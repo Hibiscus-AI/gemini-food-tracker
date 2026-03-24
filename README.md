@@ -50,9 +50,10 @@ gemini-food-tracker/
 │   ├── src/
 │   └── package.json
 ├── goldendataset/                  # Ground-truth test data
-│   ├── dishes.csv                  # 1,000 dishes — calories, macros, ingredients
-│   ├── dish_ingredients.csv        # Per-ingredient nutrition breakdown
-│   ├── ingredients_database.csv    # 551 ingredients with USDA nutrition values
+│   ├── metadata/                   # Nutrition CSVs
+│   │   ├── dishes.csv              # 1,000 dishes — calories, macros, ingredients
+│   │   ├── dish_ingredients.csv    # Per-ingredient nutrition breakdown
+│   │   └── ingredients_database.csv # 551 ingredients (USDA)
 │   ├── dish_*/image.jpeg           # Food images (1 per dish)
 │   └── README.md                   # Dataset documentation
 └── Dockerfile
