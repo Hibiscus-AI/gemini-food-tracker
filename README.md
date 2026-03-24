@@ -7,9 +7,9 @@ AI-powered food analysis using Google Gemini. Upload a photo, get ingredients, c
 | | |
 |---|---|
 | **What it does** | Identifies food, detects ingredients, estimates calories and macros from a photo |
-| **Powered by** | Google Gemini API |
+| **Powered by** | Google Gemini 2.0 Flash |
 | **Stack** | FastAPI (Python) + React (TypeScript) |
-| **Golden Dataset** | Nutrition5K — 5,006 dishes with verified nutrition data |
+| **Golden Dataset** | 1,000 dishes with verified nutrition data + 551 ingredient database |
 
 ## Setup
 
@@ -43,26 +43,30 @@ Open **http://localhost:5173**
 
 ```
 gemini-food-tracker/
-├── backend/              # FastAPI server
-├── frontend/             # React app
-├── goldendataset/        # Nutrition5K test data (5,006 dishes)
-│   ├── dishes.csv        # Dish-level nutrition summary
-│   ├── dish_ingredients.csv  # Per-ingredient breakdown
-│   ├── ingredients_metadata.csv
-│   └── README.md         # Dataset documentation
+├── backend/                        # FastAPI server
+│   ├── main.py                     # API endpoints + Gemini integration
+│   └── requirements.txt
+├── frontend/                       # React app
+│   ├── src/
+│   └── package.json
+├── goldendataset/                  # Ground-truth test data
+│   ├── dishes.csv                  # 1,000 dishes — calories, macros, ingredients
+│   ├── dish_ingredients.csv        # Per-ingredient nutrition breakdown
+│   ├── ingredients_database.csv    # 551 ingredients with USDA nutrition values
+│   ├── dish_*/image.jpeg           # Food images (1 per dish)
+│   └── README.md                   # Dataset documentation
 └── Dockerfile
 ```
 
 ## Golden Dataset
 
-The `goldendataset/` contains Nutrition5K metadata for evaluation. Dish images (6 GB) are stored separately on [Google Drive]().
+The `goldendataset/` directory contains 1,000 real cafeteria dishes from Google's Nutrition5K research, each with a food image and verified nutrition data. Used for evaluating model accuracy.
 
-See [`goldendataset/README.md`](goldendataset/README.md) for full documentation.
+See [`goldendataset/README.md`](goldendataset/README.md) for details.
 
 ## Deploy
 
 ```bash
-# Docker
 docker build -t gemini-food-tracker .
 docker run -e GEMINI_API_KEY="your_key" -p 8000:8000 gemini-food-tracker
 ```

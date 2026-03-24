@@ -1,112 +1,77 @@
-# Golden Dataset - Nutrition5K
+# Golden Dataset
 
-A curated golden test dataset for evaluating the Gemini Food Tracker's ability to predict ingredients and calories from food images.
+Ground-truth test data for evaluating the Gemini Food Tracker. Based on Google Research's [Nutrition5K](https://github.com/google-research-datasets/Nutrition5k) (CVPR 2021).
 
-## Source
+## Contents
 
-Based on Google Research's [Nutrition5K](https://github.com/google-research-datasets/Nutrition5k) dataset (CVPR 2021), containing real cafeteria food plates with verified nutritional information.
-
-## What's Inside
-
-| File / Folder | Description |
-|---------------|-------------|
-| `dishes.csv` | Summary of all 5,006 dishes with total nutrition and ingredient list |
-| `dish_ingredients.csv` | Detailed per-ingredient breakdown (28,455 rows) |
-| `ingredients_metadata.csv` | Nutrition info per gram for all 555 unique ingredients |
-| `dish_XXXXXXXXXX/` | 4,793 dish folders, each containing multiple food images |
+| File | Rows | Description |
+|------|------|-------------|
+| `dishes.csv` | 1,000 | One row per dish — total calories, fat, carbs, protein, ingredient list |
+| `dish_ingredients.csv` | 5,454 | One row per dish-ingredient pair — per-ingredient nutrition |
+| `ingredients_database.csv` | 551 | Ingredient lookup table — calories and macros per gram (USDA sourced) |
+| `dish_*/image.jpeg` | 1,000 | One food image per dish |
 
 ## Units
 
-| Measurement | Unit |
-|-------------|------|
-| Mass | grams (g) |
-| Calories | kilocalories (kcal) |
-| Fat, Carbs, Protein | grams (g) |
+All nutrition values use: **kcal** for calories, **grams** for mass/fat/carbs/protein/fiber.
 
-## How to Read the Dataset
+## File Formats
 
-### 1. `dishes.csv`
+### `dishes.csv`
 
-One row per dish. Each row contains:
+| Column | Description |
+|--------|-------------|
+| Dish ID | Links to image folder (e.g., `dish_1561662216/image.jpeg`) |
+| Total Mass (grams) | Weight of the dish |
+| Total Calories (kcal) | Total energy |
+| Total Fat (grams) | Total fat |
+| Total Carbs (grams) | Total carbohydrates |
+| Total Protein (grams) | Total protein |
+| Number of Ingredients | Ingredient count |
+| Ingredients | Pipe-separated list (e.g., `pork\|rice\|greens`) |
 
-```
-Dish ID, Total Mass (grams), Total Calories (kcal), Total Fat (grams), Total Carbs (grams), Total Protein (grams), Number of Ingredients, Ingredients
-```
+### `dish_ingredients.csv`
 
-- **Dish ID** links to the image folder (e.g., `dish_1561662216` -> `dish_1561662216/frames_sampled30/`)
-- **Ingredients** column is a pipe-separated (`|`) list of ingredient names
+| Column | Description |
+|--------|-------------|
+| Dish ID | Links to parent dish |
+| Ingredient ID | Nutrition5K ingredient ID |
+| Ingredient Name | Human-readable name |
+| Mass (grams) | Weight of this ingredient |
+| Calories (kcal) | Calories from this ingredient |
+| Fat / Carbs / Protein (grams) | Macros from this ingredient |
 
-### 2. `dish_ingredients.csv`
+### `ingredients_database.csv`
 
-One row per dish-ingredient pair:
+| Column | Description |
+|--------|-------------|
+| ingredient | Name (sorted A–Z) |
+| calories_per_g | kcal per gram |
+| fat_per_g | Fat per gram |
+| carbs_per_g | Carbs per gram |
+| protein_per_g | Protein per gram |
+| fiber_per_g | Fiber per gram |
+| source | `usda` or `nutrition5k` (fallback) |
 
-```
-Dish ID, Ingredient ID, Ingredient Name, Mass (grams), Calories (kcal), Fat (grams), Carbs (grams), Protein (grams)
-```
-
-Use this to get the full nutritional breakdown per ingredient for any dish.
-
-### 3. `ingredients_metadata.csv`
-
-Reference table for all 555 unique ingredients with per-gram nutrition values:
-
-```
-ingr, id, cal/g, fat(g), carb(g), protein(g)
-```
-
-### 4. Image Folders (`dish_XXXXXXXXXX/`)
-
-Each dish folder contains `frames_sampled30/` with images from 4 camera angles:
-
-```
-dish_1561662216/
-  frames_sampled30/
-    camera_A_frame_001.jpeg    # Camera A - side angle
-    camera_A_frame_002.jpeg
-    camera_B_frame_001.jpeg    # Camera B - side angle
-    camera_B_frame_002.jpeg
-    camera_C_frame_001.jpeg    # Camera C - side angle
-    camera_C_frame_002.jpeg
-    camera_D_frame_001.jpeg    # Camera D - side angle
-    camera_D_frame_002.jpeg
-```
-
-## How to Use for Testing
-
-1. Pick a dish (e.g., `dish_1561662216`)
-2. Feed an image from its folder to the Gemini model
-3. Get the model's prediction (ingredients + calories)
-4. Compare against ground truth in `dishes.csv` / `dish_ingredients.csv`
-5. Measure accuracy
-
-### Quick Example (Python)
+## How to Use
 
 ```python
 import csv
 
-# Load ground truth for a dish
 dish_id = "dish_1561662216"
 
-with open("dishes.csv") as f:
-    reader = csv.DictReader(f)
-    for row in reader:
+# Get ground truth
+with open("goldendataset/dishes.csv") as f:
+    for row in csv.DictReader(f):
         if row["Dish ID"] == dish_id:
             print(f"Calories: {row['Total Calories (kcal)']} kcal")
             print(f"Ingredients: {row['Ingredients']}")
             break
 
-# Get image path
-image_path = f"{dish_id}/frames_sampled30/camera_A_frame_002.jpeg"
+# Image path
+image = f"goldendataset/{dish_id}/image.jpeg"
 ```
-
-## Dataset Stats
-
-- **Total dishes**: 5,006
-- **Dishes with images**: 4,793
-- **Total ingredient entries**: 28,455
-- **Unique ingredients**: 555
-- **Images per dish**: ~8-20 (multiple angles and frames)
 
 ## License
 
-Creative Commons V4.0 - free to use for any purpose, including commercial.
+Creative Commons V4.0

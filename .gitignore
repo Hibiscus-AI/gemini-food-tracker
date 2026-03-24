@@ -1,13 +1,7 @@
-# OS files
 .DS_Store
-
-# Dataset image folders (too large for GitHub - stored in Google Drive)
-goldendataset/dish_*/
-datasets/
-
-# Python
 __pycache__/
 *.pyc
-
-# Environment
 .env
+datasets/
+node_modules/
+venv/
