@@ -519,7 +519,7 @@ Content-Type: multipart/form-data
         </table>
 
         <h3>2. POST /recalculate — Update After User Edits</h3>
-        <p>Call this when user adds/removes/changes ingredient grams. <strong>No image needed.</strong> Instant response.</p>
+        <p>Call this when user adds/removes/changes ingredient grams or serving size. <strong>No image needed.</strong> Instant response.</p>
         <div class="api-box">
 <span class="method">POST</span> <span class="url">/recalculate</span>
 Content-Type: application/json
@@ -529,10 +529,14 @@ Content-Type: application/json
     { <span class="key">"name"</span>: <span class="str">"basmati rice"</span>, <span class="key">"grams"</span>: <span class="num">200</span> },
     { <span class="key">"name"</span>: <span class="str">"chicken"</span>, <span class="key">"grams"</span>: <span class="num">150</span>, <span class="key">"cooking_method"</span>: <span class="str">"fried"</span> }
   ],
-  <span class="key">"portion_grams"</span>: <span class="num">350</span>  <span class="comment">// optional override</span>
+  <span class="key">"portion_grams"</span>: <span class="num">350</span>,       <span class="comment">// optional — direct grams override</span>
+  <span class="key">"serving_size"</span>: <span class="str">"bowl"</span>,      <span class="comment">// optional — "bowl", "plate", "cup", etc.</span>
+  <span class="key">"num_servings"</span>: <span class="num">1.5</span>          <span class="comment">// optional — multiplier for serving_size</span>
 }
+
+<span class="comment">// Priority: portion_grams > serving_size > default (use ingredient totals as-is)</span>
         </div>
-        <p>Returns the same nutrition fields: <code>ingredient_chips</code>, <code>ingredient_breakdown</code>, <code>nutrition_per_serving</code>, <code>nutrition_per_100g</code>, <code>data_source</code>.</p>
+        <p>Returns: <code>ingredient_chips</code>, <code>ingredient_breakdown</code>, <code>nutrition_per_serving</code>, <code>nutrition_per_100g</code>, <code>serving_size</code>, <code>data_source</code>.</p>
 
         <h3>3. GET /health — Server Status</h3>
         <div class="api-box">

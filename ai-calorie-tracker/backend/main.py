@@ -152,7 +152,9 @@ class DishAnalysis(BaseModel):
 class RecalculateRequest(BaseModel):
     """Request body for /recalculate — user adds/removes/edits ingredients."""
     ingredients: list[dict]  # [{"name": "rice", "grams": 200}, ...]
-    portion_grams: Optional[float] = None
+    portion_grams: Optional[float] = None       # direct grams override
+    serving_size: Optional[str] = None           # "bowl", "plate", "cup", etc.
+    num_servings: Optional[float] = None         # 1, 1.5, 2, etc.
 
 class FoodAnalysis(BaseModel):
     success: bool
@@ -968,11 +970,29 @@ async def recalculate_nutrition(req: RecalculateRequest):
     total_fiber = sum(i.nutrition.fiber_g for i in breakdown)
     total_grams = sum(i.estimated_grams for i in breakdown)
 
-    portion = req.portion_grams or total_grams
-    scale = portion / total_grams if total_grams > 0 and req.portion_grams else 1
+    # Apply serving size (same logic as /analyze)
+    serving_label = None
+    scale = 1
+    if req.portion_grams and req.portion_grams > 0:
+        scale = req.portion_grams / total_grams if total_grams > 0 else 1
+        serving_label = f"{req.portion_grams}g"
+    elif req.serving_size:
+        serving_g = SERVING_SIZES.get(req.serving_size)
+        servings = req.num_servings or 1
+        if serving_g:
+            target_g = serving_g * servings
+            scale = target_g / total_grams if total_grams > 0 else 1
+            serving_label = f"{servings} {req.serving_size}" if servings != 1 else req.serving_size
+        else:
+            scale = servings
+            serving_label = f"{servings} piece" if servings != 1 else "1 piece"
+    else:
+        serving_label = f"~{round(total_grams)}g (estimated)"
+
+    portion = total_grams * scale
 
     chips = [
-        IngredientChip(name=i.name.title(), cal=round(i.nutrition.calories * scale), grams=i.estimated_grams)
+        IngredientChip(name=i.name.title(), cal=round(i.nutrition.calories * scale), grams=round(i.estimated_grams * scale, 1))
         for i in breakdown
     ]
 
@@ -996,6 +1016,7 @@ async def recalculate_nutrition(req: RecalculateRequest):
         "ingredient_breakdown": [i.model_dump() for i in breakdown],
         "ingredient_chips": [c.model_dump() for c in chips],
         "estimated_portion_g": round(portion, 1),
+        "serving_size": serving_label,
         "nutrition_per_serving": {
             "calories": round(total_cal * scale, 1),
             "protein_g": round(total_pro * scale, 1),
