@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Food Tracker — Flow Documentation</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2rem; margin-bottom: 8px; }
+        .header p { opacity: 0.9; font-size: 1rem; max-width: 600px; margin: 0 auto; }
+        .header .version {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-top: 12px;
+        }
+
+        .container { max-width: 960px; margin: 0 auto; padding: 30px 20px; }
+
+        /* Section */
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .section h2 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+            color: #333;
+        }
+        .section h3 {
+            font-size: 1.05rem;
+            margin: 20px 0 10px;
+            color: #555;
+        }
+
+        /* Flow Diagram */
+        .flow {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .flow-step {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 14px;
+            padding: 20px 28px;
+            width: 100%;
+            max-width: 700px;
+            position: relative;
+        }
+        .flow-step.highlight {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        .flow-step.gemini { border-left: 5px solid #4285f4; }
+        .flow-step.ifct { border-left: 5px solid #ff9800; }
+        .flow-step.usda { border-left: 5px solid #0f9d58; }
+        .flow-step.fallback { border-left: 5px solid #ea4335; }
+        .flow-step.user { border-left: 5px solid #ab47bc; }
+
+        .flow-step .step-badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .gemini .step-badge { background: #e8f0fe; color: #4285f4; }
+        .ifct .step-badge { background: #fff3e0; color: #e65100; }
+        .usda .step-badge { background: #e8f5e9; color: #2e7d32; }
+        .fallback .step-badge { background: #fce4ec; color: #c62828; }
+        .user .step-badge { background: #f3e5f5; color: #7b1fa2; }
+
+        .flow-step h4 { font-size: 1rem; margin-bottom: 6px; }
+        .flow-step p { font-size: 0.9rem; color: #666; }
+
+        .flow-arrow {
+            font-size: 1.5rem;
+            color: #bbb;
+            padding: 6px 0;
+        }
+
+        /* Waterfall */
+        .waterfall {
+            display: flex;
+            gap: 12px;
+            margin: 16px 0;
+            flex-wrap: wrap;
+        }
+        .waterfall-step {
+            flex: 1;
+            min-width: 180px;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            position: relative;
+        }
+        .waterfall-step.w-ifct { background: #fff3e0; border: 2px solid #ff9800; }
+        .waterfall-step.w-usda { background: #e8f5e9; border: 2px solid #0f9d58; }
+        .waterfall-step.w-local { background: #e3f2fd; border: 2px solid #1976d2; }
+        .waterfall-step.w-gemini { background: #fce4ec; border: 2px solid #ea4335; }
+
+        .waterfall-step .w-num {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: white;
+            margin-bottom: 8px;
+        }
+        .w-ifct .w-num { background: #ff9800; }
+        .w-usda .w-num { background: #0f9d58; }
+        .w-local .w-num { background: #1976d2; }
+        .w-gemini .w-num { background: #ea4335; }
+
+        .waterfall-step h5 { font-size: 0.9rem; margin-bottom: 4px; }
+        .waterfall-step p { font-size: 0.8rem; color: #666; }
+        .waterfall-arrow {
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #bbb;
+            font-size: 1.2rem;
+        }
+
+        /* API Box */
+        .api-box {
+            background: #1e1e2e;
+            color: #cdd6f4;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.82rem;
+            overflow-x: auto;
+            line-height: 1.7;
+        }
+        .api-box .method { color: #89b4fa; font-weight: 700; }
+        .api-box .url { color: #a6e3a1; }
+        .api-box .key { color: #89b4fa; }
+        .api-box .str { color: #a6e3a1; }
+        .api-box .num { color: #fab387; }
+        .api-box .comment { color: #6c7086; font-style: italic; }
+
+        /* Table */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        .info-table th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .info-table th:first-child { border-radius: 8px 0 0 0; }
+        .info-table th:last-child { border-radius: 0 8px 0 0; }
+        .info-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+        }
+        .info-table tr:hover { background: #f8f9ff; }
+
+        /* Calculation example */
+        .calc-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        .calc-table th {
+            background: #f8f9fa;
+            padding: 10px 14px;
+            text-align: center;
+            font-weight: 600;
+            border-bottom: 2px solid #ddd;
+        }
+        .calc-table th:first-child { text-align: left; }
+        .calc-table td {
+            padding: 10px 14px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+        .calc-table td:first-child { text-align: left; font-weight: 500; }
+        .calc-table .total-row {
+            background: linear-gradient(135deg, #667eea15, #764ba215);
+            font-weight: 700;
+        }
+        .calc-table .source-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .source-tag.ifct { background: #fff3e0; color: #e65100; }
+        .source-tag.usda { background: #e8f5e9; color: #2e7d32; }
+        .source-tag.ai { background: #fce4ec; color: #c62828; }
+
+        /* Edge cases */
+        .edge-case {
+            display: flex;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 10px;
+            margin: 10px 0;
+            align-items: flex-start;
+        }
+        .edge-case.handled { background: #e8f5e9; }
+        .edge-case.info { background: #e3f2fd; }
+        .edge-case .icon { font-size: 1.3rem; flex-shrink: 0; }
+        .edge-case .text { font-size: 0.9rem; }
+        .edge-case .text strong { display: block; margin-bottom: 2px; }
+
+        /* Chips preview */
+        .chips-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        .chip {
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .chip.ing { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+        .chip.suggested { background: #fff3e0; color: #e65100; border: 1px dashed #ffb74d; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .waterfall { flex-direction: column; }
+            .waterfall-arrow { display: none; }
+            .container { padding: 16px; }
+            .section { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Hibiscus Health — AI Food Tracker</h1>
+    <p>AI-powered food identification and nutrition calculation flow for the mobile app</p>
+    <span class="version">API v3.0.0 | Backend Team Reference</span>
+</div>
+
+<div class="container">
+
+    <!-- ==================== OVERVIEW ==================== -->
+    <div class="section">
+        <h2>How It Works (Overview)</h2>
+        <p>The AI handles <strong>two things only</strong>: identifying what's in the photo, and looking up accurate nutrition data. Everything else (saving meals, history, UI) is handled by the backend/frontend teams.</p>
+
+        <div class="flow">
+            <div class="flow-step gemini">
+                <span class="step-badge">Step 1 — Gemini AI</span>
+                <h4>User Snaps a Photo</h4>
+                <p>Gemini identifies the food, lists each ingredient, and estimates grams per ingredient.
+                Also suggests hidden ingredients (spices, oils, sauces) that aren't visible.</p>
+            </div>
+            <div class="flow-arrow">&#8595;</div>
+            <div class="flow-step highlight">
+                <span class="step-badge" style="background:#eee;color:#555;">Step 2 — Nutrition Waterfall</span>
+                <h4>Look Up Nutrition Per Ingredient</h4>
+                <p>For each ingredient, check databases in order: IFCT (Indian) &rarr; USDA (global) &rarr; Local DB &rarr; Gemini guess. First match wins.</p>
+            </div>
+            <div class="flow-arrow">&#8595;</div>
+            <div class="flow-step" style="border-left: 5px solid #667eea;">
+                <span class="step-badge" style="background:#667eea20;color:#667eea;">Step 3 — Calculate</span>
+                <h4>Total Calories &amp; Macros</h4>
+                <p>Each ingredient: <code>grams &times; (cal per 100g / 100)</code>. Sum all = total meal nutrition. Return ingredient chips, breakdown table, and totals.</p>
+            </div>
+            <div class="flow-arrow">&#8595;</div>
+            <div class="flow-step user">
+                <span class="step-badge">Step 4 — User Edits</span>
+                <h4>User Adjusts Ingredients or Quantity</h4>
+                <p>User can add/remove/edit ingredients or change grams. App calls <code>/recalculate</code> — instant update, no re-scan needed.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== DETAILED EXAMPLE ==================== -->
+    <div class="section">
+        <h2>Worked Example: Chicken Biryani</h2>
+
+        <h3>Step 1: Gemini Identifies</h3>
+        <p>User photographs a plate of biryani. Gemini returns:</p>
+        <div class="api-box">
+<span class="comment">// Gemini's response (simplified)</span>
+{
+  <span class="key">"food_name"</span>: <span class="str">"Chicken Biryani"</span>,
+  <span class="key">"confidence"</span>: <span class="num">0.92</span>,
+  <span class="key">"ingredients"</span>: [
+    { <span class="key">"name"</span>: <span class="str">"basmati rice"</span>, <span class="key">"grams"</span>: <span class="num">200</span> },
+    { <span class="key">"name"</span>: <span class="str">"chicken"</span>, <span class="key">"grams"</span>: <span class="num">150</span>, <span class="key">"cooking_method"</span>: <span class="str">"fried"</span> },
+    { <span class="key">"name"</span>: <span class="str">"onion"</span>, <span class="key">"grams"</span>: <span class="num">40</span>, <span class="key">"cooking_method"</span>: <span class="str">"fried"</span> },
+    { <span class="key">"name"</span>: <span class="str">"ghee"</span>, <span class="key">"grams"</span>: <span class="num">15</span> },
+    { <span class="key">"name"</span>: <span class="str">"yogurt"</span>, <span class="key">"grams"</span>: <span class="num">30</span> }
+  ],
+  <span class="key">"suggested_missing_ingredients"</span>: [<span class="str">"turmeric"</span>, <span class="str">"cumin"</span>, <span class="str">"salt"</span>, <span class="str">"saffron"</span>, <span class="str">"bay leaf"</span>]
+}
+        </div>
+
+        <h3>Step 2: Nutrition Lookup (Waterfall)</h3>
+        <table class="calc-table">
+            <thead>
+                <tr>
+                    <th>Ingredient</th>
+                    <th>Grams</th>
+                    <th>Source</th>
+                    <th>Cal/100g</th>
+                    <th>Calories</th>
+                    <th>Protein</th>
+                    <th>Carbs</th>
+                    <th>Fat</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Basmati Rice</td>
+                    <td>200g</td>
+                    <td><span class="source-tag ifct">IFCT</span></td>
+                    <td>130</td>
+                    <td>260</td>
+                    <td>5.4g</td>
+                    <td>56.8g</td>
+                    <td>0.6g</td>
+                </tr>
+                <tr>
+                    <td>Chicken (fried)</td>
+                    <td>150g</td>
+                    <td><span class="source-tag ifct">IFCT</span></td>
+                    <td>150</td>
+                    <td>225</td>
+                    <td>22.5g</td>
+                    <td>6.0g</td>
+                    <td>12.0g</td>
+                </tr>
+                <tr>
+                    <td>Onion (fried)</td>
+                    <td>40g</td>
+                    <td><span class="source-tag ifct">IFCT</span></td>
+                    <td>40</td>
+                    <td>16</td>
+                    <td>0.4g</td>
+                    <td>3.7g</td>
+                    <td>0.04g</td>
+                </tr>
+                <tr>
+                    <td>Ghee</td>
+                    <td>15g</td>
+                    <td><span class="source-tag ifct">IFCT</span></td>
+                    <td>900</td>
+                    <td>135</td>
+                    <td>0g</td>
+                    <td>0g</td>
+                    <td>14.9g</td>
+                </tr>
+                <tr>
+                    <td>Yogurt</td>
+                    <td>30g</td>
+                    <td><span class="source-tag ifct">IFCT</span></td>
+                    <td>60</td>
+                    <td>18</td>
+                    <td>1.1g</td>
+                    <td>1.5g</td>
+                    <td>1.0g</td>
+                </tr>
+                <tr class="total-row">
+                    <td>TOTAL</td>
+                    <td>435g</td>
+                    <td></td>
+                    <td></td>
+                    <td><strong>654 cal</strong></td>
+                    <td><strong>29.4g</strong></td>
+                    <td><strong>68.0g</strong></td>
+                    <td><strong>28.5g</strong></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Step 3: What the App Shows</h3>
+        <p><strong>Ingredient Chips</strong> (from <code>ingredient_chips</code> field):</p>
+        <div class="chips-preview">
+            <span class="chip ing">Basmati Rice — 260cal</span>
+            <span class="chip ing">Chicken — 225cal</span>
+            <span class="chip ing">Onion — 16cal</span>
+            <span class="chip ing">Ghee — 135cal</span>
+            <span class="chip ing">Yogurt — 18cal</span>
+        </div>
+        <p><strong>Suggested Missing</strong> (from <code>suggested_ingredients</code> field — user can tap to add):</p>
+        <div class="chips-preview">
+            <span class="chip suggested">+ Turmeric</span>
+            <span class="chip suggested">+ Cumin</span>
+            <span class="chip suggested">+ Salt</span>
+            <span class="chip suggested">+ Saffron</span>
+        </div>
+
+        <h3>Step 4: User Edits Rice to 300g</h3>
+        <p>App calls <code>POST /recalculate</code> with updated list. Instant response — no re-scan.</p>
+        <div class="api-box">
+<span class="method">POST</span> <span class="url">/recalculate</span>
+{
+  <span class="key">"ingredients"</span>: [
+    { <span class="key">"name"</span>: <span class="str">"basmati rice"</span>, <span class="key">"grams"</span>: <span class="num">300</span> },   <span class="comment">// changed from 200 → 300</span>
+    { <span class="key">"name"</span>: <span class="str">"chicken"</span>, <span class="key">"grams"</span>: <span class="num">150</span> },
+    { <span class="key">"name"</span>: <span class="str">"onion"</span>, <span class="key">"grams"</span>: <span class="num">40</span> },
+    { <span class="key">"name"</span>: <span class="str">"ghee"</span>, <span class="key">"grams"</span>: <span class="num">15</span> },
+    { <span class="key">"name"</span>: <span class="str">"yogurt"</span>, <span class="key">"grams"</span>: <span class="num">30</span> },
+    { <span class="key">"name"</span>: <span class="str">"turmeric"</span>, <span class="key">"grams"</span>: <span class="num">2</span> }       <span class="comment">// user added from suggestions</span>
+  ]
+}
+<span class="comment">// Response: updated totals + new chips instantly</span>
+        </div>
+    </div>
+
+    <!-- ==================== WATERFALL DETAIL ==================== -->
+    <div class="section">
+        <h2>Nutrition Waterfall (Per Ingredient)</h2>
+        <p>Each ingredient goes through this lookup chain. <strong>First match wins</strong> — we stop as soon as we find verified data.</p>
+
+        <div class="waterfall">
+            <div class="waterfall-step w-ifct">
+                <span class="waterfall-arrow">&rarr;</span>
+                <div class="w-num">1</div>
+                <h5>IFCT</h5>
+                <p>126 Indian foods<br>Paneer, ghee, dal, chapati, biryani, sambar...</p>
+            </div>
+            <div class="waterfall-step w-usda">
+                <span class="waterfall-arrow">&rarr;</span>
+                <div class="w-num">2</div>
+                <h5>USDA</h5>
+                <p>170,000+ foods<br>Lab-verified, global coverage</p>
+            </div>
+            <div class="waterfall-step w-local">
+                <span class="waterfall-arrow">&rarr;</span>
+                <div class="w-num">3</div>
+                <h5>Local DB</h5>
+                <p>551 ingredients<br>Pre-loaded fallback</p>
+            </div>
+            <div class="waterfall-step w-gemini">
+                <div class="w-num">4</div>
+                <h5>Gemini AI</h5>
+                <p>Last resort<br>AI estimates (less accurate)</p>
+            </div>
+        </div>
+
+        <p style="margin-top:16px;color:#666;font-size:0.9rem;">
+            <strong>Why IFCT first?</strong> Indian foods measured in Indian context — ghee, paneer, dal values reflect actual Indian cooking. USDA measures US produce/cooking styles. For Indian cuisine, IFCT is more accurate.
+        </p>
+    </div>
+
+    <!-- ==================== API REFERENCE ==================== -->
+    <div class="section">
+        <h2>API Endpoints (for Backend/Frontend Teams)</h2>
+
+        <h3>1. POST /analyze — Scan Food Photo</h3>
+        <div class="api-box">
+<span class="method">POST</span> <span class="url">/analyze</span>
+Content-Type: multipart/form-data
+
+<span class="key">file</span>: image file (required, max 10MB)
+<span class="key">serving_size</span>: <span class="str">"bowl"</span> | <span class="str">"plate"</span> | <span class="str">"cup"</span> | <span class="str">"piece"</span> (optional)
+<span class="key">num_servings</span>: <span class="num">1.5</span> (optional)
+<span class="key">portion_grams</span>: <span class="num">350</span> (optional, overrides serving_size)
+        </div>
+        <p><strong>Response includes:</strong></p>
+        <table class="info-table">
+            <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+            <tr><td><code>success</code></td><td>bool</td><td>Did the request complete</td></tr>
+            <tr><td><code>is_food</code></td><td>bool</td><td><strong>false</strong> if selfie/screenshot/non-food image</td></tr>
+            <tr><td><code>food_name</code></td><td>string</td><td>"Chicken Biryani", "Egg Tofu Salad", etc.</td></tr>
+            <tr><td><code>confidence</code></td><td>float</td><td>0.0 to 1.0 — how sure Gemini is</td></tr>
+            <tr><td><code>confidence_warning</code></td><td>string?</td><td>Warning if confidence &lt; 60%</td></tr>
+            <tr><td><code>ingredient_chips</code></td><td>array</td><td><code>[{"name": "Rice", "cal": 260, "grams": 200}]</code> — ready for UI chips</td></tr>
+            <tr><td><code>suggested_ingredients</code></td><td>array?</td><td><code>["turmeric", "cumin", "salt"]</code> — hidden ingredients user can add</td></tr>
+            <tr><td><code>ingredient_breakdown</code></td><td>array</td><td>Full nutrition per ingredient (cal, protein, carbs, fat, fiber, source)</td></tr>
+            <tr><td><code>nutrition_per_serving</code></td><td>object</td><td>Total: <code>{calories, protein_g, carbs_g, fat_g, fiber_g}</code></td></tr>
+            <tr><td><code>nutrition_per_100g</code></td><td>object</td><td>Per 100g reference values</td></tr>
+            <tr><td><code>estimated_portion_g</code></td><td>float</td><td>Total estimated weight in grams</td></tr>
+            <tr><td><code>data_source</code></td><td>string</td><td><code>"verified"</code> | <code>"verified+fallback"</code> | <code>"local_db"</code> | <code>"ai"</code> | <code>"label"</code></td></tr>
+            <tr><td><code>tips</code></td><td>string?</td><td>Brief health tip from Gemini</td></tr>
+            <tr><td><code>warnings</code></td><td>array?</td><td>Any issues (low confidence, clamped grams, etc.)</td></tr>
+            <tr><td><code>dishes</code></td><td>array?</td><td>Only present when multiple dishes detected on plate</td></tr>
+        </table>
+
+        <h3>2. POST /recalculate — Update After User Edits</h3>
+        <p>Call this when user adds/removes/changes ingredient grams. <strong>No image needed.</strong> Instant response.</p>
+        <div class="api-box">
+<span class="method">POST</span> <span class="url">/recalculate</span>
+Content-Type: application/json
+
+{
+  <span class="key">"ingredients"</span>: [
+    { <span class="key">"name"</span>: <span class="str">"basmati rice"</span>, <span class="key">"grams"</span>: <span class="num">200</span> },
+    { <span class="key">"name"</span>: <span class="str">"chicken"</span>, <span class="key">"grams"</span>: <span class="num">150</span>, <span class="key">"cooking_method"</span>: <span class="str">"fried"</span> }
+  ],
+  <span class="key">"portion_grams"</span>: <span class="num">350</span>  <span class="comment">// optional override</span>
+}
+        </div>
+        <p>Returns the same nutrition fields: <code>ingredient_chips</code>, <code>ingredient_breakdown</code>, <code>nutrition_per_serving</code>, <code>nutrition_per_100g</code>, <code>data_source</code>.</p>
+
+        <h3>3. GET /health — Server Status</h3>
+        <div class="api-box">
+<span class="method">GET</span> <span class="url">/health</span>
+
+<span class="comment">// Returns: model, DB counts, serving sizes, status</span>
+        </div>
+
+        <h3>4. GET /serving-sizes — Available Presets</h3>
+        <div class="api-box">
+<span class="method">GET</span> <span class="url">/serving-sizes</span>
+
+<span class="comment">// Returns: {"bowl": 250, "plate": 350, "cup": 240, "piece": null, ...}</span>
+        </div>
+    </div>
+
+    <!-- ==================== EDGE CASES ==================== -->
+    <div class="section">
+        <h2>Edge Cases Handled</h2>
+        <p>Things the frontend team should be aware of:</p>
+
+        <div class="edge-case handled">
+            <span class="icon">&#128247;</span>
+            <div class="text">
+                <strong>Non-food image (selfie, screenshot, random object)</strong>
+                Returns <code>is_food: false</code> with error message. Show the error to user, don't show nutrition.
+            </div>
+        </div>
+        <div class="edge-case handled">
+            <span class="icon">&#127962;</span>
+            <div class="text">
+                <strong>Packaged food with nutrition label</strong>
+                AI reads the label directly. Returns <code>data_source: "label"</code>. Most accurate — no estimation involved.
+            </div>
+        </div>
+        <div class="edge-case handled">
+            <span class="icon">&#9888;&#65039;</span>
+            <div class="text">
+                <strong>Blurry / dark photo</strong>
+                Returns low confidence (&lt;60%). Check <code>confidence_warning</code> field and show it to user.
+            </div>
+        </div>
+        <div class="edge-case handled">
+            <span class="icon">&#127858;</span>
+            <div class="text">
+                <strong>Multiple dishes on plate</strong>
+                Returns <code>dishes</code> array with separate breakdown per dish. Flat fields show combined totals.
+            </div>
+        </div>
+        <div class="edge-case handled">
+            <span class="icon">&#9749;</span>
+            <div class="text">
+                <strong>Beverages (coffee, juice, lassi)</strong>
+                Auto-detected. <code>dish_type: "beverage"</code>. Grams represent ml (density ~1 for most drinks).
+            </div>
+        </div>
+        <div class="edge-case handled">
+            <span class="icon">&#127859;</span>
+            <div class="text">
+                <strong>Cooking method matters</strong>
+                "Fried egg" gets a fat multiplier vs "boiled egg". Cooking method is preserved, not stripped.
+            </div>
+        </div>
+        <div class="edge-case handled">
+            <span class="icon">&#8987;</span>
+            <div class="text">
+                <strong>AI timeout</strong>
+                If Gemini takes &gt;15s, returns error: "AI analysis timed out". User should retry with clearer photo.
+            </div>
+        </div>
+        <div class="edge-case handled">
+            <span class="icon">&#128190;</span>
+            <div class="text">
+                <strong>Image too large (&gt;10MB)</strong>
+                Returns HTTP 413. Frontend should compress or resize before uploading.
+            </div>
+        </div>
+        <div class="edge-case info">
+            <span class="icon">&#128161;</span>
+            <div class="text">
+                <strong>Ingredient not in any database</strong>
+                Falls through to Gemini AI estimate. <code>source: "ai"</code> on that ingredient. Less accurate but never returns empty.
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== FRONTEND CHECKLIST ==================== -->
+    <div class="section">
+        <h2>Frontend Integration Checklist</h2>
+        <table class="info-table">
+            <tr><th style="width:40%">Check</th><th>What to do</th></tr>
+            <tr><td>Check <code>is_food === false</code></td><td>Show error message, hide nutrition UI</td></tr>
+            <tr><td>Check <code>confidence_warning</code></td><td>Show yellow banner: "Results may be inaccurate"</td></tr>
+            <tr><td>Show <code>ingredient_chips</code></td><td>Render as tappable chips: <code>"Rice — 260cal"</code></td></tr>
+            <tr><td>Show <code>suggested_ingredients</code></td><td>Render as dashed-border chips with + icon. On tap → call <code>/recalculate</code> with the added ingredient</td></tr>
+            <tr><td>On ingredient edit</td><td>Call <code>POST /recalculate</code> with full updated ingredient list</td></tr>
+            <tr><td>Check <code>data_source</code></td><td>Show badge: "Verified" (green), "AI Estimate" (orange), "From Label" (blue)</td></tr>
+            <tr><td>Check <code>warnings</code> array</td><td>Show any warnings to user (low confidence, clamped portions, etc.)</td></tr>
+            <tr><td>Handle HTTP 413</td><td>Compress image before upload if &gt;10MB</td></tr>
+            <tr><td>Handle timeout error</td><td>Show retry button with message</td></tr>
+        </table>
+    </div>
+
+    <!-- ==================== DATABASES ==================== -->
+    <div class="section">
+        <h2>Nutrition Databases</h2>
+        <table class="info-table">
+            <tr><th>Database</th><th>Coverage</th><th>Count</th><th>Accuracy</th></tr>
+            <tr>
+                <td><strong>IFCT</strong> (Indian Food Composition Tables)</td>
+                <td>Indian ingredients, dishes, sweets, grains, spices</td>
+                <td>126</td>
+                <td>Verified — real Indian food context</td>
+            </tr>
+            <tr>
+                <td><strong>USDA</strong> (FoodData Central API)</td>
+                <td>Global — all foods, lab-measured</td>
+                <td>170,000+</td>
+                <td>Lab-verified, gold standard</td>
+            </tr>
+            <tr>
+                <td><strong>Local DB</strong> (ingredients_database.csv)</td>
+                <td>Common ingredients from Nutrition5K dataset</td>
+                <td>551</td>
+                <td>Good — sourced from USDA/Nutrition5K</td>
+            </tr>
+            <tr>
+                <td><strong>Gemini AI</strong> (fallback)</td>
+                <td>Anything not in above databases</td>
+                <td>Unlimited</td>
+                <td>Approximate — AI estimation, least reliable</td>
+            </tr>
+        </table>
+    </div>
+
+</div>
+
+<div style="text-align:center;padding:30px;color:#999;font-size:0.85rem;">
+    Hibiscus Health &mdash; AI Food Tracker Documentation &mdash; v3.0.0
+</div>
+
+</body>
+</html>
