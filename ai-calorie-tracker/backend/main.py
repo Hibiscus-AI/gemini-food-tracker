@@ -15,6 +15,7 @@ import re
 import logging
 import asyncio
 import time
+import unicodedata
 from io import BytesIO
 from typing import Optional
 
@@ -228,7 +229,19 @@ Guidelines:
 - For BEVERAGES, set type to "beverage" and estimate volume in ml (use estimated_grams for ml since density ~1)
 - List ALL visible ingredients including cooking fats (oil, ghee, butter)
 - INCLUDE the cooking_method field when visible (fried, grilled, steamed, boiled, etc.) — this affects nutrition
-- Use simple, common ingredient names (e.g., "chicken" not "grilled boneless chicken thigh")
+- CRITICAL for ingredient names: Use the SIMPLEST, most generic base ingredient name:
+  - Use "beef" not "beef tenderloin", "skirt steak", "ribeye", or "sirloin"
+  - Use "chicken" not "chicken breast", "chicken thigh", "chicken drumstick"
+  - Use "rice" not "jasmine rice", "arborio rice", "sushi rice"
+  - Use "mushroom" not "shiitake mushroom", "enoki mushroom", "portobello"
+  - Use "fish" not "salmon fillet", "tilapia", "sea bass" (unless the specific type is nutritionally very different)
+  - Use "oil" not "extra virgin olive oil", "avocado oil", "canola oil"
+  - Use "flour" not "bread flour", "cake flour", "self-rising flour"
+  - Use "cheese" not "gruyere", "emmental", "manchego" (use "mozzarella", "cheddar", "paneer" only if clearly identifiable)
+  - Use "nuts" or "mixed nuts" not "macadamia", "pine nuts" unless clearly visible
+  - Use "lentils" not "French lentils", "beluga lentils"
+  - Use "beans" not "cannellini beans", "navy beans" (but "kidney beans", "chickpea", "black beans" are OK — they're nutritionally different)
+  - For Indian food: prefer "dal", "ghee", "paneer", "chapati", "curd" etc.
 - Estimate grams based on visual cues (plate size, utensils, hand for scale)
 - estimated_portion_g = sum of all ingredient grams
 - suggested_missing_ingredients: list ingredients that are LIKELY in the dish but NOT visible (spices, sauces, marinades, hidden fats). These help users add what's missing.
@@ -236,6 +249,8 @@ Guidelines:
 - Return ONLY valid JSON, no markdown"""
 
 def parse_gemini_response(text: str) -> dict:
+    if not text or not text.strip():
+        raise ValueError("Gemini returned empty response")
     text = text.strip()
     if text.startswith("```"):
         text = re.sub(r'^```json?\s*', '', text)
@@ -243,13 +258,22 @@ def parse_gemini_response(text: str) -> dict:
     try:
         return json.loads(text)
     except json.JSONDecodeError:
-        match = re.search(r'\{[\s\S]*\}', text)
-        if match:
-            try:
-                return json.loads(match.group())
-            except Exception:
-                pass
-        raise ValueError(f"Could not parse: {text[:200]}")
+        # Find outermost JSON object by tracking brace depth (avoids greedy regex issues)
+        start_idx = text.find("{")
+        if start_idx == -1:
+            raise ValueError(f"No JSON object found in: {text[:200]}")
+        depth = 0
+        for i in range(start_idx, len(text)):
+            if text[i] == "{":
+                depth += 1
+            elif text[i] == "}":
+                depth -= 1
+                if depth == 0:
+                    try:
+                        return json.loads(text[start_idx:i + 1])
+                    except json.JSONDecodeError as e:
+                        raise ValueError(f"Invalid JSON in response: {e}") from e
+        raise ValueError(f"Unbalanced braces in response: {text[:200]}")
 
 # ============== INGREDIENT MATCHING ==============
 
@@ -269,6 +293,9 @@ COOKING_METHODS = {
 
 def normalize_ingredient(name: str) -> str:
     """Normalize ingredient name for DB matching. Preserves cooking context."""
+    # Unicode normalize (café→cafe, decomposed→composed)
+    name = unicodedata.normalize("NFKD", name)
+    name = "".join(c for c in name if not unicodedata.combining(c))
     name = name.strip().lower()
     # Only strip non-nutritionally-relevant prefixes
     for prefix in ["fresh ", "dried ", "sliced ", "diced ",
@@ -276,6 +303,279 @@ def normalize_ingredient(name: str) -> str:
         if name.startswith(prefix):
             name = name[len(prefix):]
     return name
+
+def singularize(word: str) -> str:
+    """Basic singularize: eggs→egg, tomatoes→tomato, potatoes→potato, berries→berry."""
+    if word.endswith("ies") and len(word) > 4:
+        return word[:-3] + "y"
+    if word.endswith("oes"):
+        return word[:-2]
+    if word.endswith("es") and len(word) > 3:
+        return word[:-2]
+    if word.endswith("s") and not word.endswith("ss") and len(word) > 2:
+        return word[:-1]
+    return word
+
+# ============== INGREDIENT ALIAS MAP ==============
+# Maps Gemini's likely output → canonical DB name
+# Covers: regional names, synonyms, alternate spellings, Hindi/Indian names
+
+INGREDIENT_ALIASES: dict[str, str] = {
+    # Vegetables — regional / synonym
+    "capsicum": "bell pepper",
+    "bell pepper": "capsicum",  # bidirectional
+    "aubergine": "brinjal",
+    "eggplant": "brinjal",
+    "lady finger": "okra",
+    "ladyfinger": "okra",
+    "ladies finger": "okra",
+    "bhindi": "okra",
+    "courgette": "zucchini",
+    "swede": "turnip",
+    "beetroot": "beet",
+    "sweetcorn": "corn",
+    "maize": "corn",
+    "baby corn": "corn",
+    "scallion": "spring onion",
+    "green onion": "spring onion",
+    "shallot": "onion",
+    "red onion": "onion",
+    "white onion": "onion",
+    "yellow onion": "onion",
+    "roma tomatoes": "tomato",
+    "cherry tomatoes": "tomato",
+    "plum tomatoes": "tomato",
+    "grape tomatoes": "tomato",
+    "baby spinach": "spinach",
+    "palak": "spinach",
+    "methi": "fenugreek leaves",
+    "drumstick leaves": "drumstick",
+    "karela": "bitter gourd",
+    "lauki": "bottle gourd",
+    "tori": "ridge gourd",
+    "turai": "ridge gourd",
+    "parwal": "snake gourd",
+    "baingan": "brinjal",
+    "aloo": "potato",
+    "pyaaz": "onion",
+    "tamatar": "tomato",
+    "adrak": "ginger",
+    "lehsun": "garlic",
+    "hari mirch": "green chili",
+    "lal mirch": "red chili powder",
+    "red chili powder": "green chili",
+    "chili powder": "green chili",
+    "green chili pepper": "green chili",
+    "red pepper flakes": "green chili",
+
+    # Dairy
+    "dahi": "curd",
+    "yoghurt": "yogurt",
+    "plain yogurt": "yogurt",
+    "greek yogurt": "yogurt",
+    "low fat yogurt": "yogurt",
+    "cottage cheese": "paneer",
+    "cream cheese": "khoya",
+    "heavy cream": "khoya",
+    "whipping cream": "khoya",
+    "clarified butter": "ghee",
+    "unsalted butter": "butter",
+    "salted butter": "butter",
+    "chaas": "buttermilk",
+    "mattha": "buttermilk",
+    "whole milk": "milk",
+    "skimmed milk": "milk",
+    "toned milk": "milk",
+    "full cream milk": "milk",
+
+    # Grains & flour
+    "roti": "chapati",
+    "phulka": "chapati",
+    "tandoori roti": "chapati",
+    "rumali roti": "chapati",
+    "flatbread": "chapati",
+    "tortilla": "chapati",
+    "suji": "semolina",
+    "sooji": "semolina",
+    "rava": "semolina",
+    "all purpose flour": "maida",
+    "plain flour": "maida",
+    "refined flour": "maida",
+    "whole wheat flour": "atta",
+    "wheat flour": "atta",
+    "wholemeal flour": "atta",
+    "finger millet": "ragi",
+    "nachni": "ragi",
+    "sorghum": "jowar",
+    "pearl millet": "bajra",
+    "white rice": "basmati rice",
+    "brown rice": "basmati rice",
+    "steamed rice": "basmati rice",
+    "cooked rice": "basmati rice",
+    "plain rice": "basmati rice",
+    "jasmine rice": "basmati rice",
+    "long grain rice": "basmati rice",
+
+    # Lentils & legumes
+    "lentils": "dal (lentil)",
+    "red lentils": "masoor dal",
+    "yellow lentils": "toor dal",
+    "pigeon peas": "toor dal",
+    "arhar dal": "toor dal",
+    "split green gram": "moong dal",
+    "mung dal": "moong dal",
+    "mung bean": "moong dal",
+    "black lentils": "urad dal",
+    "white urad": "urad dal",
+    "bengal gram": "chana dal",
+    "split chickpea": "chana dal",
+    "garbanzo beans": "chickpea",
+    "chickpeas": "chickpea",
+    "chole": "chickpea",
+    "chana": "chickpea",
+    "kabuli chana": "chickpea",
+    "rajma": "kidney beans",
+    "red kidney beans": "kidney beans",
+
+    # Oils & fats
+    "vegetable oil": "groundnut oil",
+    "cooking oil": "groundnut oil",
+    "canola oil": "groundnut oil",
+    "sunflower oil": "groundnut oil",
+    "olive oil": "groundnut oil",
+    "extra virgin olive oil": "groundnut oil",
+    "refined oil": "groundnut oil",
+    "butter": "ghee",
+
+    # Spices & herbs
+    "cilantro": "coriander leaves",
+    "fresh coriander": "coriander leaves",
+    "dhania": "coriander leaves",
+    "pudina": "mint leaves",
+    "fresh mint": "mint leaves",
+    "haldi": "turmeric",
+    "turmeric powder": "turmeric",
+    "jeera": "cumin seeds",
+    "cumin": "cumin seeds",
+    "ground cumin": "cumin seeds",
+    "rai": "mustard seeds",
+    "sarson": "mustard seeds",
+    "methi dana": "fenugreek seeds",
+    "curry patta": "curry leaves",
+    "kadi patta": "curry leaves",
+    "garam masala": "cumin seeds",  # approximate
+    "sea salt": "salt",
+    "rock salt": "salt",
+    "black pepper": "cumin seeds",  # approximate — low cal anyway
+
+    # Sweeteners
+    "gur": "jaggery",
+    "gud": "jaggery",
+    "palm sugar": "palm jaggery",
+    "coconut sugar": "palm jaggery",
+    "brown sugar": "jaggery",
+    "honey": "jaggery",
+    "maple syrup": "jaggery",
+    "imli": "tamarind",
+
+    # Nuts & dry fruits
+    "groundnut": "peanut",
+    "groundnuts": "peanut",
+    "moongphali": "peanut",
+    "kaju": "cashew",
+    "badam": "almond",
+    "akhrot": "walnut",
+    "pista": "pistachio",
+    "kishmish": "raisin",
+    "sultana": "raisin",
+    "khajoor": "dates",
+    "dried dates": "dates",
+    "medjool dates": "dates",
+
+    # Fruits
+    "aam": "mango",
+    "kela": "banana",
+    "plantain": "banana",
+    "papita": "papaya",
+    "amrood": "guava",
+    "anaar": "pomegranate",
+    "chiku": "sapota",
+    "kathal": "jackfruit",
+    "litchi": "lychee",
+    "sitaphal": "custard apple",
+    "nariyal pani": "coconut water",
+    "tender coconut water": "coconut water",
+
+    # Meat & protein
+    "chicken breast": "chicken curry",
+    "chicken thigh": "chicken curry",
+    "chicken leg": "chicken curry",
+    "boneless chicken": "chicken curry",
+    "chicken pieces": "chicken curry",
+    "goat meat": "mutton",
+    "goat": "mutton",
+    "lamb chops": "lamb",
+    "lamb leg": "lamb",
+    "shrimp": "prawns",
+    "prawn": "prawns",
+    "jumbo shrimp": "prawns",
+    "boiled egg": "egg",
+    "fried egg": "egg",
+    "scrambled egg": "egg",
+    "poached egg": "egg",
+    "omelette": "egg",
+    "omelet": "egg",
+    "egg white": "egg",
+
+    # Prepared dishes
+    "dosa masala": "dosa",
+    "masala dosa": "dosa",
+    "plain dosa": "dosa",
+    "medu vada": "vada",
+    "onion pakoda": "pakora",
+    "bhajiya": "pakora",
+    "aloo paratha": "paratha",
+    "gobi paratha": "paratha",
+    "stuffed paratha": "paratha",
+    "veg biryani": "biryani rice",
+    "chicken biryani": "biryani rice",
+    "hyderabadi biryani": "biryani rice",
+    "veg pulao": "pulao",
+    "jeera pulao": "jeera rice",
+    "aloo samosa": "samosa",
+
+    # Beverages
+    "filter coffee": "masala chai",
+    "black coffee": "masala chai",
+    "green tea": "masala chai",
+    "black tea": "masala chai",
+    "sweet lassi": "lassi sweet",
+    "mango lassi": "lassi sweet",
+    "sugarcane": "sugarcane juice",
+
+    # Coconut variants
+    "fresh coconut": "coconut fresh",
+    "grated coconut": "coconut fresh",
+    "desiccated coconut": "coconut fresh",
+    "coconut cream": "coconut milk",
+    "coconut flakes": "coconut fresh",
+    "copra": "coconut fresh",
+}
+
+def resolve_alias(name: str) -> str:
+    """Resolve ingredient name through alias map. Returns canonical name or original."""
+    normalized = name.strip().lower()
+    if normalized in INGREDIENT_ALIASES:
+        resolved = INGREDIENT_ALIASES[normalized]
+        logger.info(f"Alias: '{normalized}' → '{resolved}'")
+        return resolved
+    # Try singular form in aliases too
+    singular = singularize(normalized)
+    if singular != normalized and singular in INGREDIENT_ALIASES:
+        resolved = INGREDIENT_ALIASES[singular]
+        logger.info(f"Alias (singular): '{normalized}' → '{resolved}'")
+        return resolved
+    return normalized
 
 def extract_cooking_method(name: str) -> tuple[str, str | None]:
     """Extract cooking method from ingredient name. Returns (clean_name, method)."""
@@ -288,18 +588,21 @@ def extract_cooking_method(name: str) -> tuple[str, str | None]:
 def fuzzy_match_db(name: str, db: dict) -> str | None:
     """
     Safe fuzzy matching — avoids false positives like 'rice' matching 'licorice'.
-    Uses word-boundary matching instead of raw substring.
+    Uses word-boundary matching with singular/plural awareness.
     """
     name_words = set(name.split())
+    # Also build singular versions for matching
+    name_singular = {singularize(w) for w in name_words}
 
     best_key = None
     best_score = 0
 
     for key in db:
         key_words = set(key.split())
+        key_singular = {singularize(w) for w in key_words}
 
-        # Exact word overlap (e.g., "basmati rice" matches "rice")
-        overlap = name_words & key_words
+        # Match on both original and singular forms
+        overlap = (name_words & key_words) | (name_singular & key_singular)
         if not overlap:
             continue
 
@@ -323,6 +626,7 @@ def fuzzy_match_db(name: str, db: dict) -> str | None:
 # ============== USDA API LOOKUP ==============
 
 USDA_CACHE: dict[str, dict | None] = {}
+_usda_cache_lock = asyncio.Lock()
 
 def _check_usda_relevance(query: str, usda_description: str) -> bool:
     """Check that USDA result is actually relevant to what we searched for."""
@@ -342,8 +646,10 @@ async def lookup_usda(ingredient_name: str) -> dict | None:
     """
     normalized = normalize_ingredient(ingredient_name)
 
-    if normalized in USDA_CACHE:
-        return USDA_CACHE[normalized]
+    # Check cache (with lock to prevent duplicate API calls)
+    async with _usda_cache_lock:
+        if normalized in USDA_CACHE:
+            return USDA_CACHE[normalized]
 
     start = time.time()
     try:
@@ -360,7 +666,8 @@ async def lookup_usda(ingredient_name: str) -> dict | None:
             )
             if resp.status_code != 200:
                 logger.warning(f"USDA API error {resp.status_code} for '{normalized}'")
-                USDA_CACHE[normalized] = None
+                async with _usda_cache_lock:
+                    USDA_CACHE[normalized] = None
                 return None
 
             data = resp.json()
@@ -376,13 +683,15 @@ async def lookup_usda(ingredient_name: str) -> dict | None:
                     },
                 )
                 if resp.status_code != 200:
-                    USDA_CACHE[normalized] = None
+                    async with _usda_cache_lock:
+                        USDA_CACHE[normalized] = None
                     return None
                 data = resp.json()
                 foods = data.get("foods", [])
 
             if not foods:
-                USDA_CACHE[normalized] = None
+                async with _usda_cache_lock:
+                    USDA_CACHE[normalized] = None
                 return None
 
             # Find the first relevant match
@@ -395,7 +704,8 @@ async def lookup_usda(ingredient_name: str) -> dict | None:
 
             if not food:
                 logger.info(f"USDA: no relevant match for '{normalized}' (candidates: {[f.get('description','') for f in foods[:3]]})")
-                USDA_CACHE[normalized] = None
+                async with _usda_cache_lock:
+                    USDA_CACHE[normalized] = None
                 return None
 
             # Extract nutrients from the best match
@@ -415,7 +725,8 @@ async def lookup_usda(ingredient_name: str) -> dict | None:
                     nutrients["fiber_g"] = val
 
             if "calories" not in nutrients:
-                USDA_CACHE[normalized] = None
+                async with _usda_cache_lock:
+                    USDA_CACHE[normalized] = None
                 return None
 
             result = {
@@ -429,12 +740,14 @@ async def lookup_usda(ingredient_name: str) -> dict | None:
             }
             elapsed = time.time() - start
             logger.info(f"USDA: '{normalized}' → '{food.get('description','')}' ({elapsed:.1f}s)")
-            USDA_CACHE[normalized] = result
+            async with _usda_cache_lock:
+                USDA_CACHE[normalized] = result
             return result
 
     except Exception as e:
         logger.error(f"USDA lookup failed for '{normalized}': {e}")
-        USDA_CACHE[normalized] = None
+        async with _usda_cache_lock:
+            USDA_CACHE[normalized] = None
         return None
 
 # ============== LOCAL DB LOOKUP ==============
@@ -450,57 +763,59 @@ def _db_to_per100g(entry: dict, source: str) -> dict:
         "source": source,
     }
 
+def _try_all_forms(name: str, db: dict, source: str) -> dict | None:
+    """Try exact, singular, alias, fuzzy, and cooking-method-stripped lookups."""
+    # 1. Exact match
+    if name in db:
+        return _db_to_per100g(db[name], source)
+
+    # 2. Singular form
+    singular = singularize(name)
+    if singular != name and singular in db:
+        return _db_to_per100g(db[singular], source)
+
+    # 3. Alias resolution
+    aliased = resolve_alias(name)
+    if aliased != name:
+        if aliased in db:
+            return _db_to_per100g(db[aliased], source)
+        singular_alias = singularize(aliased)
+        if singular_alias != aliased and singular_alias in db:
+            return _db_to_per100g(db[singular_alias], source)
+
+    # 4. Fuzzy match
+    match = fuzzy_match_db(name, db)
+    if match:
+        logger.info(f"{source} fuzzy: '{name}' → '{match}'")
+        return _db_to_per100g(db[match], source)
+
+    # 5. Try aliased name in fuzzy
+    if aliased != name:
+        match = fuzzy_match_db(aliased, db)
+        if match:
+            logger.info(f"{source} fuzzy (alias): '{name}' → '{aliased}' → '{match}'")
+            return _db_to_per100g(db[match], source)
+
+    # 6. Strip cooking method and retry
+    clean_name, _ = extract_cooking_method(name)
+    if clean_name != name:
+        result = _try_all_forms(clean_name, db, source)
+        if result:
+            return result
+
+    return None
+
 def lookup_local_db(ingredient_name: str) -> dict | None:
     """Look up nutrition from local ingredients_database.csv."""
     normalized = normalize_ingredient(ingredient_name)
-
-    # Exact match
-    if normalized in LOCAL_INGREDIENTS_DB:
-        return _db_to_per100g(LOCAL_INGREDIENTS_DB[normalized], "local_db")
-
-    # Safe fuzzy match
-    match = fuzzy_match_db(normalized, LOCAL_INGREDIENTS_DB)
-    if match:
-        logger.info(f"Local DB fuzzy: '{normalized}' → '{match}'")
-        return _db_to_per100g(LOCAL_INGREDIENTS_DB[match], "local_db")
-
-    # Also try without cooking method
-    clean_name, _ = extract_cooking_method(normalized)
-    if clean_name != normalized:
-        if clean_name in LOCAL_INGREDIENTS_DB:
-            return _db_to_per100g(LOCAL_INGREDIENTS_DB[clean_name], "local_db")
-        match = fuzzy_match_db(clean_name, LOCAL_INGREDIENTS_DB)
-        if match:
-            return _db_to_per100g(LOCAL_INGREDIENTS_DB[match], "local_db")
-
-    return None
+    return _try_all_forms(normalized, LOCAL_INGREDIENTS_DB, "local_db")
 
 # ============== IFCT LOOKUP ==============
 
 def lookup_ifct(ingredient_name: str) -> dict | None:
     """Look up nutrition from IFCT Indian food database."""
     normalized = normalize_ingredient(ingredient_name)
-
-    # Exact match
-    if normalized in IFCT_DB:
-        return _db_to_per100g(IFCT_DB[normalized], "ifct")
-
-    # Safe fuzzy match
-    match = fuzzy_match_db(normalized, IFCT_DB)
-    if match:
-        logger.info(f"IFCT fuzzy: '{normalized}' → '{match}'")
-        return _db_to_per100g(IFCT_DB[match], "ifct")
-
-    # Try without cooking method
-    clean_name, _ = extract_cooking_method(normalized)
-    if clean_name != normalized:
-        if clean_name in IFCT_DB:
-            return _db_to_per100g(IFCT_DB[clean_name], "ifct")
-        match = fuzzy_match_db(clean_name, IFCT_DB)
-        if match:
-            return _db_to_per100g(IFCT_DB[match], "ifct")
-
-    return None
+    return _try_all_forms(normalized, IFCT_DB, "ifct")
 
 # ============== COOKING METHOD ADJUSTMENT ==============
 
@@ -563,27 +878,53 @@ async def get_ingredient_nutrition(name: str, grams: float, cooking_method: str 
     if local:
         return _build_result(local, "local_db")
 
-    # 4. Fallback: ask Gemini for this specific ingredient
+    # 4. Last-resort DB search: try each word individually (longest first)
+    #    "beef tenderloin" → try "tenderloin" then "beef"
+    #    "shiitake mushroom" → try "mushroom" then "shiitake"
+    words = normalize_ingredient(name).split()
+    if len(words) > 1:
+        # Sort by length descending — prefer more specific words
+        for word in sorted(words, key=len, reverse=True):
+            word = singularize(word)
+            aliased = resolve_alias(word)
+            for db, src in [(IFCT_DB, "ifct"), (LOCAL_INGREDIENTS_DB, "local_db")]:
+                if aliased in db:
+                    logger.info(f"Word fallback: '{name}' → word '{word}' → alias '{aliased}'")
+                    return _build_result(_db_to_per100g(db[aliased], src), src)
+                if word in db:
+                    logger.info(f"Word fallback: '{name}' → word '{word}'")
+                    return _build_result(_db_to_per100g(db[word], src), src)
+
+    # 5. Fallback: ask Gemini for this specific ingredient
     if gemini_client:
         try:
             resp = gemini_client.models.generate_content(
                 model=MODEL_NAME,
                 contents=f'Nutrition per 100g of "{name}"{f" ({cooking_method})" if cooking_method else ""}. Return JSON only: {{"calories":N,"protein_g":N,"carbs_g":N,"fat_g":N,"fiber_g":N}}',
             )
-            nut = json.loads(re.search(r'\{[^}]+\}', resp.text).group())
-            logger.info(f"Gemini fallback for '{name}': {nut}")
-            return IngredientNutrition(
-                name=name,
-                estimated_grams=grams,
-                nutrition=NutritionInfo(
-                    calories=round(nut.get("calories", 0) * multiplier, 1),
-                    protein_g=round(nut.get("protein_g", 0) * multiplier, 1),
-                    carbs_g=round(nut.get("carbs_g", 0) * multiplier, 1),
-                    fat_g=round(nut.get("fat_g", 0) * multiplier, 1),
-                    fiber_g=round(nut.get("fiber_g", 0) * multiplier, 1),
-                ),
-                source="ai",
-            )
+            if not resp.text or not resp.text.strip():
+                logger.error(f"Gemini fallback: empty response for '{name}'")
+            else:
+                match = re.search(r'\{[^}]+\}', resp.text)
+                if not match:
+                    logger.error(f"Gemini fallback: no JSON in response for '{name}'")
+                else:
+                    nut = json.loads(match.group())
+                    logger.info(f"Gemini fallback for '{name}': {nut}")
+                    return IngredientNutrition(
+                        name=name,
+                        estimated_grams=grams,
+                        nutrition=NutritionInfo(
+                            calories=round(nut.get("calories", 0) * multiplier, 1),
+                            protein_g=round(nut.get("protein_g", 0) * multiplier, 1),
+                            carbs_g=round(nut.get("carbs_g", 0) * multiplier, 1),
+                            fat_g=round(nut.get("fat_g", 0) * multiplier, 1),
+                            fiber_g=round(nut.get("fiber_g", 0) * multiplier, 1),
+                        ),
+                        source="ai",
+                    )
+        except (json.JSONDecodeError, ValueError, AttributeError) as e:
+            logger.error(f"Gemini nutrition fallback parse error for '{name}': {e}")
         except Exception as e:
             logger.error(f"Gemini nutrition fallback failed for '{name}': {e}")
 
@@ -759,7 +1100,11 @@ async def analyze_food(
         gemini_time = time.time() - request_start
         logger.info(f"Gemini responded in {gemini_time:.1f}s")
 
-        data = parse_gemini_response(response.text)
+        try:
+            data = parse_gemini_response(response.text)
+        except ValueError as e:
+            logger.error(f"Failed to parse Gemini response: {e}")
+            return FoodAnalysis(success=False, error="Could not understand AI response. Try a clearer photo.")
         logger.info(f"Gemini raw: {json.dumps(data)[:500]}")
 
         # --- FIX #2: Non-food detection ---
@@ -933,10 +1278,15 @@ async def analyze_food(
             warnings=warnings if warnings else None,
         )
 
+    except (IOError, Image.UnidentifiedImageError) as e:
+        logger.error(f"Image processing error: {e}")
+        return FoodAnalysis(success=False, error="Invalid or corrupted image file. Please upload a valid image.")
+    except HTTPException:
+        raise  # Let FastAPI handle HTTP exceptions
     except Exception as e:
         elapsed = time.time() - request_start
-        logger.error(f"Analysis failed after {elapsed:.1f}s: {e}", exc_info=True)
-        return FoodAnalysis(success=False, error=str(e))
+        logger.error(f"Analysis failed after {elapsed:.1f}s: {type(e).__name__}: {e}", exc_info=True)
+        return FoodAnalysis(success=False, error="Something went wrong analyzing the image. Please try again.")
 
 @app.post("/recalculate")
 async def recalculate_nutrition(req: RecalculateRequest):
@@ -1051,7 +1401,10 @@ if STATIC_DIR.exists():
 
     @app.get("/{path:path}")
     async def serve_spa(path: str):
-        file_path = STATIC_DIR / path
+        file_path = (STATIC_DIR / path).resolve()
+        # Prevent path traversal — must stay within STATIC_DIR
+        if not str(file_path).startswith(str(STATIC_DIR.resolve())):
+            return FileResponse(STATIC_DIR / "index.html")
         if file_path.exists() and file_path.is_file():
             return FileResponse(file_path)
         return FileResponse(STATIC_DIR / "index.html")
