@@ -132,15 +132,27 @@ class IngredientNutrition(BaseModel):
     nutrition: NutritionInfo
     source: str = "ai"  # "ifct", "usda", "local_db", or "ai"
 
+class IngredientChip(BaseModel):
+    """Simplified format for UI ingredient chips: 'Eggs - 24cal'"""
+    name: str
+    cal: int
+    grams: float
+
 class DishAnalysis(BaseModel):
     dish_name: str
     dish_type: str = "solid"  # "solid", "beverage", "packaged"
     ingredients: list[str]
     ingredient_breakdown: list[IngredientNutrition]
+    ingredient_chips: list[IngredientChip]
     estimated_portion_g: float
     nutrition_per_serving: NutritionInfo
     nutrition_per_100g: NutritionInfo
     data_source: str
+
+class RecalculateRequest(BaseModel):
+    """Request body for /recalculate — user adds/removes/edits ingredients."""
+    ingredients: list[dict]  # [{"name": "rice", "grams": 200}, ...]
+    portion_grams: Optional[float] = None
 
 class FoodAnalysis(BaseModel):
     success: bool
@@ -152,6 +164,8 @@ class FoodAnalysis(BaseModel):
     # Flat fields for backward compat (first dish)
     ingredients: Optional[list[str]] = None
     ingredient_breakdown: Optional[list[IngredientNutrition]] = None
+    ingredient_chips: Optional[list[IngredientChip]] = None
+    suggested_ingredients: Optional[list[str]] = None
     estimated_portion_g: Optional[float] = None
     serving_size: Optional[str] = None
     nutrition_per_serving: Optional[NutritionInfo] = None
@@ -202,11 +216,12 @@ IF REGULAR FOOD/BEVERAGE: Identify the dish(es) and list individual ingredients 
             "estimated_portion_g": 335
         }
     ],
+    "suggested_missing_ingredients": ["salt", "cumin", "turmeric", "yogurt marinade"],
     "tips": "Brief health tip"
 }
 
 Guidelines:
-- Be specific about food name (e.g., "Chicken Biryani" not "rice dish")
+- Be specific about food name (e.g., "Chicken Biryani" not "rice dish") — use natural, human-friendly names
 - If there are MULTIPLE separate dishes visible (e.g., rice + curry in separate bowls), list each as a separate dish
 - For BEVERAGES, set type to "beverage" and estimate volume in ml (use estimated_grams for ml since density ~1)
 - List ALL visible ingredients including cooking fats (oil, ghee, butter)
@@ -214,6 +229,7 @@ Guidelines:
 - Use simple, common ingredient names (e.g., "chicken" not "grilled boneless chicken thigh")
 - Estimate grams based on visual cues (plate size, utensils, hand for scale)
 - estimated_portion_g = sum of all ingredient grams
+- suggested_missing_ingredients: list ingredients that are LIKELY in the dish but NOT visible (spices, sauces, marinades, hidden fats). These help users add what's missing.
 - Works for ALL cuisines worldwide
 - Return ONLY valid JSON, no markdown"""
 
@@ -649,11 +665,22 @@ async def process_dish(dish_data: dict, warnings: list[str]) -> DishAnalysis:
     else:
         data_source = "ai"
 
+    # Build simplified chips for UI
+    chips = [
+        IngredientChip(
+            name=i.name.title(),
+            cal=round(i.nutrition.calories),
+            grams=i.estimated_grams,
+        )
+        for i in ingredient_breakdown
+    ]
+
     return DishAnalysis(
         dish_name=dish_name,
         dish_type=dish_type,
         ingredients=[i.name for i in ingredient_breakdown],
         ingredient_breakdown=ingredient_breakdown,
+        ingredient_chips=chips,
         estimated_portion_g=round(estimated_portion, 1),
         nutrition_per_serving=nutrition_per_serving,
         nutrition_per_100g=nutrition_per_100g,
@@ -810,9 +837,13 @@ async def analyze_food(
             dish_result = await process_dish(dish_data, warnings)
             processed_dishes.append(dish_result)
 
+        # Extract suggested missing ingredients from Gemini
+        suggested_ingredients = data.get("suggested_missing_ingredients", [])
+
         # Aggregate totals across all dishes for the flat response
         all_ingredients = []
         all_breakdown = []
+        all_chips = []
         total_grams = 0
         total_cal = total_pro = total_carb = total_fat = total_fiber = 0
         all_sources = set()
@@ -820,6 +851,7 @@ async def analyze_food(
         for d in processed_dishes:
             all_ingredients.extend(d.ingredients)
             all_breakdown.extend(d.ingredient_breakdown)
+            all_chips.extend(d.ingredient_chips)
             total_grams += d.estimated_portion_g
             total_cal += d.nutrition_per_serving.calories
             total_pro += d.nutrition_per_serving.protein_g
@@ -888,6 +920,8 @@ async def analyze_food(
             dishes=processed_dishes if len(processed_dishes) > 1 else None,
             ingredients=all_ingredients,
             ingredient_breakdown=all_breakdown,
+            ingredient_chips=all_chips,
+            suggested_ingredients=suggested_ingredients if suggested_ingredients else None,
             estimated_portion_g=round(estimated_portion * scale, 1),
             serving_size=serving_label,
             nutrition_per_serving=nutrition_per_serving,
@@ -901,6 +935,83 @@ async def analyze_food(
         elapsed = time.time() - request_start
         logger.error(f"Analysis failed after {elapsed:.1f}s: {e}", exc_info=True)
         return FoodAnalysis(success=False, error=str(e))
+
+@app.post("/recalculate")
+async def recalculate_nutrition(req: RecalculateRequest):
+    """
+    Recalculate nutrition when user adds/removes/edits ingredients.
+    No image needed — just ingredient list + grams.
+
+    Request: {"ingredients": [{"name": "rice", "grams": 200}, {"name": "chicken", "grams": 120}], "portion_grams": 350}
+    """
+    if not req.ingredients:
+        raise HTTPException(400, "At least one ingredient required")
+
+    start = time.time()
+    breakdown = []
+    sources_used = set()
+
+    for ing in req.ingredients:
+        name = ing.get("name", "unknown")
+        grams = ing.get("grams", 50)
+        cooking_method = ing.get("cooking_method")
+        if grams <= 0:
+            continue
+        result = await get_ingredient_nutrition(name, grams, cooking_method)
+        breakdown.append(result)
+        sources_used.add(result.source)
+
+    total_cal = sum(i.nutrition.calories for i in breakdown)
+    total_pro = sum(i.nutrition.protein_g for i in breakdown)
+    total_carb = sum(i.nutrition.carbs_g for i in breakdown)
+    total_fat = sum(i.nutrition.fat_g for i in breakdown)
+    total_fiber = sum(i.nutrition.fiber_g for i in breakdown)
+    total_grams = sum(i.estimated_grams for i in breakdown)
+
+    portion = req.portion_grams or total_grams
+    scale = portion / total_grams if total_grams > 0 and req.portion_grams else 1
+
+    chips = [
+        IngredientChip(name=i.name.title(), cal=round(i.nutrition.calories * scale), grams=i.estimated_grams)
+        for i in breakdown
+    ]
+
+    per_100 = 100.0 / portion if portion > 0 else 1
+
+    verified = sources_used & {"usda", "ifct"}
+    if verified and sources_used == verified:
+        data_source = "verified"
+    elif verified:
+        data_source = "verified+fallback"
+    elif "local_db" in sources_used:
+        data_source = "local_db"
+    else:
+        data_source = "ai"
+
+    elapsed = time.time() - start
+    logger.info(f"Recalculate: {len(breakdown)} ingredients, {data_source}, {elapsed:.1f}s")
+
+    return {
+        "ingredients": [i.name for i in breakdown],
+        "ingredient_breakdown": [i.model_dump() for i in breakdown],
+        "ingredient_chips": [c.model_dump() for c in chips],
+        "estimated_portion_g": round(portion, 1),
+        "nutrition_per_serving": {
+            "calories": round(total_cal * scale, 1),
+            "protein_g": round(total_pro * scale, 1),
+            "carbs_g": round(total_carb * scale, 1),
+            "fat_g": round(total_fat * scale, 1),
+            "fiber_g": round(total_fiber * scale, 1),
+        },
+        "nutrition_per_100g": {
+            "calories": round(total_cal * per_100, 1),
+            "protein_g": round(total_pro * per_100, 1),
+            "carbs_g": round(total_carb * per_100, 1),
+            "fat_g": round(total_fat * per_100, 1),
+            "fiber_g": round(total_fiber * per_100, 1),
+        },
+        "data_source": data_source,
+    }
 
 @app.get("/serving-sizes")
 def get_serving_sizes():
