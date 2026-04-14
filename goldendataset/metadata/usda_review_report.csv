@@ -1,0 +1,182 @@
+ingredient,calories_per_g,fat_per_g,carbs_per_g,protein_per_g,fiber_per_g,source,usda_fdc_id,usda_description,csv_calories_per100g,usda_calories_per100g,calorie_diff_pct,reason
+almond milk,0.17,0.011,0.014,0.006,0.002,usda,174832,"Beverages, almond milk, unsweetened, shelf stable",17.0,15.0,11.8%,
+applesauce,0.68,0.001,0.171,0.002,0.012,usda,167773,"Applesauce, canned, sweetened, with salt",68.0,76.0,11.8%,
+artic char,1.54,0.081,0.0,0.2,0.0,usda,,,,,,no USDA result found
+arugula,0.25,0.007,0.036,0.026,0.016,usda,2710822,"Arugula, baby, raw",25.0,31.0,24.0%,
+baby carrots,0.35,0.001,0.082,0.006,0.028,usda,2710822,"Arugula, baby, raw",35.0,31.0,11.4%,
+bacon,5.41,0.42,0.013,0.37,0.0,usda,169893,"Bacon bits, meatless",541.0,476,12.0%,
+baked beans,0.94,0.004,0.167,0.053,0.054,usda,168128,"Beans, baked, canned, no salt added",94.0,105,11.7%,
+basil,0.23,0.006,0.027,0.032,0.016,usda,172232,"Basil, fresh",23.0,94.0,308.7%,
+bell peppers,0.26,0.003,0.062,0.01,0.018,usda,2258588,"Peppers, bell, green, raw",26.0,22.9,11.9%,
+berries,0.57,0.003,0.144,0.007,0.02,usda,171928,"Beverages, V8 SPLASH Juice Drinks, Berry Blend",57.0,29.0,49.1%,
+biscuits,3.25,0.128,0.449,0.06,0.012,usda,172070,"McDONALD'S, Sausage Biscuit",325.0,376,15.7%,
+blackberries,0.43,0.005,0.097,0.014,0.053,usda,173947,"Blackberry juice, canned",43.0,158,267.4%,
+bologna,2.47,0.193,0.052,0.137,0.0,usda,171637,"Bologna, meat and poultry",247.0,281,13.8%,
+breadsticks,4.12,0.098,0.686,0.121,0.028,usda,170789,"PIZZA HUT, breadstick, parmesan garlic",412.0,343,16.7%,
+brie cheese,3.34,0.279,0.005,0.207,0.0,usda,172178,"Cheese, camembert",334.0,300,10.2%,
+broth,0.07,0.002,0.006,0.009,0.0,usda,174536,"Soup, chicken broth, ready-to-serve",7.0,6.0,14.3%,
+brown rice,1.12,0.009,0.234,0.025,0.018,usda,169865,"Babyfood, peas and brown rice",112.0,64.0,42.9%,
+cabbage,0.25,0.001,0.058,0.013,0.025,usda,2685572,"Cabbage, bok choy, raw",25.0,20.3,18.8%,
+caesar dressing,3.25,0.334,0.025,0.02,0.0,usda,171019,"Salad dressing, italian dressing, commercial, regular",325.0,240,26.2%,
+caesar salad,1.27,0.095,0.057,0.045,0.012,usda,175160,"Fish, tuna salad",127.0,187,47.2%,
+calamari,1.75,0.068,0.078,0.179,0.0,usda,2747671,"Squid (calamari), frozen, tubes only",175.0,43.9,74.9%,
+calzones,2.39,0.097,0.261,0.115,0.015,usda,,,,,,no USDA result found
+cantaloupe,0.34,0.002,0.082,0.008,0.009,usda,169092,"Melons, cantaloupe, raw",34.0,141,314.7%,
+capers,0.23,0.009,0.035,0.024,0.032,usda,172238,"Capers, canned",23.0,96.0,317.4%,
+cappuccino,0.31,0.014,0.031,0.017,0.0,usda,,,,,,no USDA result found
+challah,2.83,0.054,0.482,0.095,0.017,usda,,,,,,no USDA result found
+champagne,0.76,0.0,0.012,0.001,0.0,usda,,,,,,no USDA result found
+cherry tomatoes,0.18,0.002,0.039,0.009,0.012,usda,1999634,"Tomato, roma",18.0,22.0,22.2%,
+chicken drumsticks,1.72,0.082,0.0,0.244,0.0,usda,2727566,"Chicken, drumstick, meat and skin, raw",172.0,125,27.3%,
+chicken salad,1.68,0.109,0.056,0.118,0.005,usda,175160,"Fish, tuna salad",168.0,187,11.3%,
+chicken soup,0.58,0.019,0.063,0.035,0.003,usda,173496,"Babyfood, dinner, chicken soup, strained",58.0,50.0,13.8%,
+chilaquiles,1.74,0.09,0.16,0.08,0.02,usda,,,,,,no USDA result found
+chili,1.18,0.051,0.107,0.079,0.03,usda,175207,"Chili with beans, canned",118.0,103,12.7%,
+chimichangas,2.44,0.12,0.24,0.09,0.02,usda,,,,,,no USDA result found
+chocolate milk,0.83,0.025,0.105,0.034,0.005,usda,170883,"Milk shakes, thick chocolate",83.0,119,43.4%,
+chow mein,1.25,0.046,0.148,0.076,0.019,usda,168084,"Restaurant, Chinese, vegetable chow mein, without meat or noodles",125.0,43.0,65.6%,
+chutney,1.85,0.004,0.459,0.004,0.011,usda,,,,,,no USDA result found
+cobbler,2.15,0.065,0.37,0.025,0.013,usda,170978,"Babyfood, cherry cobbler, junior",215.0,326,51.6%,
+coffee,0.01,0.0,0.0,0.001,0.0,usda,171881,"Beverages, coffee, brewed, breakfast blend",1.0,8.0,700.0%,
+coffee creamer,1.95,0.1,0.257,0.01,0.0,usda,175224,"SILK Coffee, soymilk",195.0,259,32.8%,
+coleslaw,0.99,0.067,0.095,0.009,0.013,usda,170340,"KFC, Coleslaw",99.0,144,45.5%,
+corn,0.86,0.012,0.191,0.032,0.021,usda,168478,"Succotash, (corn and limas), canned, with cream style corn",86.0,77.0,10.5%,
+corn nuts,4.63,0.204,0.622,0.087,0.068,usda,170162,"Nuts, cashew nuts, raw",463.0,553,19.4%,
+corn starch,3.81,0.001,0.912,0.003,0.009,usda,174099,"Bread, gluten-free, white, made with potato extract, rice starch, and rice flour",381.0,320,16.0%,
+cornbread,2.98,0.094,0.451,0.063,0.027,usda,174910,"Bread, cornbread, prepared from recipe, made with low fat (2%) milk",298.0,266,10.7%,
+country rice,1.3,0.01,0.281,0.027,0.004,usda,168074,"CRACKER BARREL, country fried shrimp platter",130.0,287,120.8%,
+cranberries,0.46,0.001,0.122,0.005,0.036,usda,171903,"Cranberry juice cocktail, bottled",46.0,54.0,17.4%,
+crawfish,0.82,0.012,0.0,0.163,0.0,usda,,,,,,no USDA result found
+crepes,2.16,0.073,0.302,0.07,0.008,usda,,,,,,no USDA result found
+cupcakes,3.05,0.108,0.48,0.042,0.005,usda,,,,,,no USDA result found
+curries,1.24,0.076,0.098,0.048,0.022,usda,171183,"SMART SOUP, Thai Coconut Curry",124.0,151,21.8%,
+custard,1.22,0.053,0.143,0.04,0.0,usda,171725,"Custard-apple, (bullock's-heart), raw",122.0,101,17.2%,
+dumplings,2.1,0.05,0.34,0.06,0.015,usda,168042,"Stew, dumpling with mutton (Navajo)",210.0,101,51.9%,
+egg salad,2.25,0.168,0.023,0.098,0.002,usda,174901,"Bagels, egg",225.0,278,23.6%,
+egg yolks,3.22,0.268,0.036,0.158,0.0,usda,171366,"Babyfood, cereal, egg yolks and bacon, junior",322.0,79.0,75.5%,
+eggs,1.55,0.106,0.011,0.13,0.0,usda,747997,"Eggs, Grade A, Large, egg white",155.0,55.0,64.5%,
+empanadas,2.9,0.14,0.33,0.08,0.015,usda,,,,,,no usable USDA nutrients
+enchiladas,1.68,0.078,0.176,0.079,0.025,usda,169854,"ON THE BORDER, cheese enchilada",168.0,271,61.3%,
+fajitas,1.5,0.055,0.13,0.12,0.02,usda,,,,,,no USDA result found
+fennel,0.31,0.002,0.073,0.012,0.031,usda,2747655,"Fennel, bulb, raw",31.0,26.9,13.2%,
+figs,0.74,0.003,0.192,0.008,0.029,usda,174666,"Figs, dried, stewed",74.0,107,44.6%,
+fish,1.11,0.04,0.0,0.201,0.0,usda,171949,"Fish, bluefish, raw",111.0,124,11.7%,
+flatbread,3.12,0.076,0.548,0.098,0.022,usda,,,,,,no usable USDA nutrients
+focaccia,2.74,0.075,0.466,0.083,0.023,usda,,,,,,no usable USDA nutrients
+fried rice,1.68,0.058,0.245,0.05,0.012,usda,173339,"Rice bowl with chicken, frozen entree, prepared (includes fried, teriyaki, and sweet and sour varieties)",168.0,126,25.0%,
+fritters,2.72,0.125,0.344,0.052,0.015,usda,,,,,,no USDA result found
+garden salad,0.2,0.002,0.036,0.013,0.018,usda,168407,"Cress, garden, raw",20.0,32.0,60.0%,
+garlic,1.49,0.005,0.331,0.064,0.021,usda,168318,"HORMEL ALWAYS TENDER, Pork Loin Filets, Lemon Garlic-Flavored",149.0,118,20.8%,
+gnocchi,1.33,0.013,0.277,0.032,0.016,usda,,,,,,no USDA result found
+goulash,1.1,0.04,0.08,0.1,0.015,usda,,,,,,no USDA result found
+grapes,0.69,0.002,0.181,0.007,0.009,usda,2346413,"Grapes, green, seedless, raw",69.0,80.1,16.1%,
+gravy,0.56,0.028,0.058,0.023,0.003,usda,171170,"Gravy, mushroom, canned",56.0,50.0,10.7%,
+greek salad,1.1,0.09,0.04,0.035,0.012,usda,330137,"Yogurt, Greek, plain, nonfat",110.0,61.0,44.5%,
+grits,0.62,0.005,0.131,0.015,0.007,usda,173899,"Cereals, QUAKER, Instant Grits, Country Bacon flavor, dry",62.0,340,448.4%,
+guacamole,1.5,0.126,0.072,0.018,0.048,usda,,,,,,no USDA result found
+gumbo,0.66,0.029,0.055,0.049,0.01,usda,172908,"Soup, chicken gumbo, canned, prepared with equal volume water",66.0,96.0,45.5%,
+gyros,2.15,0.113,0.148,0.118,0.012,usda,,,,,,no USDA result found
+ham,1.45,0.055,0.015,0.218,0.0,usda,173480,"Babyfood, meat, ham, junior",145.0,97.0,33.1%,
+hard cider,0.5,0.0,0.047,0.001,0.0,usda,173469,"Vinegar, cider",50.0,90.0,80.0%,
+hash browns,2.66,0.125,0.35,0.03,0.032,usda,169025,"DENNY'S, hash browns",266.0,197,25.9%,
+honey,3.04,0.0,0.824,0.003,0.002,usda,170968,"Babyfood, cereal, oatmeal, with honey, dry",304.0,391,28.6%,
+horseradish,0.48,0.007,0.114,0.012,0.033,usda,170483,"Drumstick pods, raw",48.0,37.0,22.9%,
+hot chocolate,0.77,0.026,0.107,0.034,0.008,usda,169766,"Peppers, hot pickled, canned",77.0,90.0,16.9%,
+ice cream soda,0.73,0.021,0.126,0.009,0.0,usda,173199,"Carbonated beverage, cream soda",73.0,51.0,30.1%,
+ice pop,0.56,0.0,0.142,0.001,0.0,usda,170266,"Frozen novelties, No Sugar Added CREAMSICLE Pops",56.0,72.0,28.6%,
+iced tea,0.33,0.0,0.083,0.0,0.0,usda,171917,"Beverages, tea, green, brewed, regular",33.0,4.0,87.9%,
+india pale ale beer,0.55,0.0,0.04,0.005,0.0,usda,168746,"Alcoholic beverage, beer, regular, all",55.0,43.0,21.8%,
+italian dressing,1.6,0.148,0.06,0.003,0.003,usda,171405,"Salad dressing, italian dressing, commercial, reduced fat",160.0,102,36.2%,
+jambalaya,1.3,0.04,0.17,0.065,0.012,usda,,,,,,no USDA result found
+jams,2.5,0.001,0.626,0.004,0.005,usda,169641,Jams and preserves,250.0,278,11.2%,
+jerky,4.1,0.25,0.11,0.337,0.005,usda,,,,,,no usable USDA nutrients
+kale,0.49,0.009,0.089,0.043,0.035,usda,169355,"Kale, cooked, boiled, drained, with salt",49.0,44.0,10.2%,
+kidney beans,1.27,0.005,0.225,0.089,0.062,usda,169885,"Beans, liquid from stewed kidney beans",127.0,47.0,63.0%,
+kimchi,0.15,0.005,0.024,0.017,0.015,usda,170392,"Cabbage, kimchi",15.0,65.0,333.3%,
+lager,0.41,0.0,0.032,0.004,0.0,usda,,,,,,no USDA result found
+lamb,2.82,0.203,0.0,0.252,0.0,usda,2727570,"Lamb, ground, raw",282.0,237,16.0%,
+lasagna,1.63,0.073,0.149,0.1,0.013,usda,169851,"OLIVE GARDEN, lasagna classico",163.0,184,12.9%,
+latte,0.42,0.016,0.045,0.024,0.0,usda,,,,,,no USDA result found
+lettuce,0.15,0.002,0.029,0.013,0.013,usda,168431,"Lettuce, red leaf, raw",15.0,13.0,13.3%,
+licorice,3.75,0.05,0.81,0.035,0.01,usda,,,,,,no USDA result found
+lime,0.3,0.002,0.106,0.007,0.028,usda,168156,"Lime juice, raw",30.0,25.0,16.7%,
+lo mein,1.48,0.05,0.195,0.063,0.015,usda,168084,"Restaurant, Chinese, vegetable chow mein, without meat or noodles",148.0,43.0,70.9%,
+mangos,0.6,0.004,0.15,0.008,0.016,usda,2710833,"Mango, Tommy Atkins, peeled, raw",60.0,68.5,14.2%,
+margarine,7.17,0.806,0.009,0.002,0.0,usda,171431,"Margarine, margarine-like vegetable oil spread, 67-70% fat, tub",717.0,606,15.5%,
+margarita,1.05,0.001,0.11,0.002,0.001,usda,,,,,,no USDA result found
+mashed potatoes,1.13,0.043,0.162,0.02,0.014,usda,170699,"Fast foods, potato, mashed",113.0,89.0,21.2%,
+meatloaf,1.7,0.076,0.068,0.153,0.005,usda,169888,Vegetarian meatloaf or patties,170.0,824,384.7%,
+milk,0.61,0.033,0.049,0.032,0.0,usda,171942,"Beverages, rice milk, unsweetened",61.0,47.0,23.0%,
+miso soup,0.32,0.01,0.037,0.024,0.005,usda,172899,"Soup, HEALTHY CHOICE Chicken and Rice Soup, canned",32.0,37.0,15.6%,
+mixed greens,0.17,0.002,0.029,0.015,0.015,usda,170375,"Beet greens, raw",17.0,22.0,29.4%,
+mousse,1.91,0.107,0.214,0.033,0.005,usda,168777,"Desserts, mousse, chocolate, prepared-from-recipe",191.0,225,17.8%,
+muesli,3.4,0.06,0.669,0.098,0.065,usda,169076,"Cereals ready-to-eat, FAMILIA",340.0,388,14.1%,
+mushroom,0.22,0.003,0.033,0.031,0.01,usda,2003601,"Mushroom, crimini",22.0,30.2,37.3%,
+nougat,4.04,0.082,0.806,0.032,0.005,usda,169630,"Candies, REESE'S, FAST BREAK, milk chocolate peanut butter and soft nougats",404.0,474,17.3%,
+nut cheese,3.13,0.27,0.108,0.08,0.02,usda,170175,"Nuts, ginkgo nuts, dried",313.0,348,11.2%,
+oatmeal,0.71,0.015,0.122,0.025,0.016,usda,174919,"Bread, reduced-calorie, oatmeal",71.0,210,195.8%,
+onions,0.4,0.001,0.093,0.011,0.017,usda,170007,"Onions, welsh, raw",40.0,34.0,15.0%,
+oregano,2.65,0.043,0.689,0.09,0.427,usda,,,,,,no usable USDA nutrients
+orzo,1.59,0.008,0.309,0.058,0.017,usda,,,,,,no USDA result found
+paella,1.52,0.04,0.21,0.075,0.01,usda,,,,,,no USDA result found
+parsley,0.36,0.008,0.063,0.03,0.033,usda,169997,"Coriander (cilantro) leaves, raw",36.0,23.0,36.1%,
+pasta salad,1.24,0.042,0.175,0.044,0.015,usda,175160,"Fish, tuna salad",124.0,187,50.8%,
+peach,0.39,0.003,0.096,0.009,0.015,usda,171352,"Babyfood, juice, apple and peach",39.0,43.0,10.3%,
+peaches,0.39,0.003,0.096,0.009,0.015,usda,171352,"Babyfood, juice, apple and peach",39.0,43.0,10.3%,
+pepper,2.51,0.033,0.639,0.104,0.251,usda,168579,"Peppers, pasilla, dried",251.0,345,37.5%,
+pickles,0.12,0.001,0.026,0.004,0.012,usda,169379,"Pickles, cucumber, sour",12.0,44.0,266.7%,
+pies,2.6,0.11,0.38,0.025,0.012,usda,173240,"Pie, fried pies, cherry",260.0,316,21.5%,
+pilaf,1.46,0.028,0.263,0.035,0.008,usda,168951,"Rice and vermicelli mix, rice pilaf flavor, unprepared",146.0,359,145.9%,
+pinto beans,1.43,0.006,0.263,0.091,0.092,usda,2644292,"Beans, pinto, canned, sodium added, drained and rinsed",143.0,117,18.2%,
+pizza sauce,0.36,0.009,0.063,0.014,0.013,usda,172880,"Sauce, pizza, canned, ready-to-serve",36.0,54.0,50.0%,
+plums,0.46,0.003,0.114,0.007,0.014,usda,2710837,"Plum, black, with skin, raw",46.0,52.7,14.6%,
+poached eggs,1.47,0.098,0.008,0.125,0.0,usda,747997,"Eggs, Grade A, Large, egg white",147.0,55.0,62.6%,
+polenta,0.85,0.009,0.18,0.018,0.011,usda,,,,,,no USDA result found
+potatoes,0.77,0.001,0.174,0.02,0.022,usda,170032,"Potatoes, raw, skin",77.0,58.0,24.7%,
+prunes,2.4,0.004,0.637,0.022,0.071,usda,168160,"Prunes, dehydrated (low-moisture), uncooked",240.0,339,41.2%,
+quesadillas,2.63,0.128,0.24,0.115,0.014,usda,167526,"Bread, salvadoran sweet cheese (quesadilla salvadorena)",263.0,374,42.2%,
+quiche,2.3,0.144,0.157,0.092,0.008,usda,,,,,,no USDA result found
+radishes,0.16,0.001,0.034,0.007,0.016,usda,168451,"Radishes, oriental, raw",16.0,18.0,12.5%,
+ranch dressing,3.27,0.326,0.056,0.014,0.003,usda,171019,"Salad dressing, italian dressing, commercial, regular",327.0,240,26.6%,
+rice,1.3,0.003,0.281,0.027,0.004,usda,168951,"Rice and vermicelli mix, rice pilaf flavor, unprepared",130.0,359,176.2%,
+risotto,1.4,0.04,0.22,0.035,0.005,usda,,,,,,no USDA result found
+roast pork,2.42,0.128,0.0,0.286,0.0,usda,169198,"Pork, fresh, loin, blade (roasts), boneless, separable lean and fat, cooked, roasted",242.0,199,17.8%,
+roasted potatoes,1.49,0.046,0.24,0.025,0.022,usda,172395,"Chicken, roasting, meat only, cooked, roasted",149.0,167,12.1%,
+salads,0.4,0.015,0.055,0.02,0.015,usda,172074,"McDONALD'S, Side Salad",40.0,20.0,50.0%,
+salmon,2.08,0.121,0.0,0.201,0.0,usda,173715,"Fish, salmon, coho, farmed, raw",208.0,160,23.1%,
+samosas,2.62,0.13,0.29,0.06,0.025,usda,,,,,,no USDA result found
+scones,3.62,0.14,0.508,0.07,0.017,usda,,,,,,no USDA result found
+seafood,1.05,0.025,0.01,0.189,0.0,usda,,,,,,no USDA result found
+seaweed,0.35,0.006,0.051,0.057,0.005,usda,167603,"Seaweed, Canadian Cultivated EMI-TSUNOMATA, rehydrated",35.0,31.0,11.4%,
+shallots,0.72,0.001,0.168,0.025,0.032,usda,170499,"Shallots, raw",72.0,301,318.1%,
+sherbet,1.44,0.02,0.302,0.014,0.01,usda,167577,"Sherbet, orange",144.0,602,318.1%,
+smoothies,0.59,0.008,0.119,0.014,0.009,usda,167796,"Fruit juice smoothie, NAKED JUICE, GREEN MACHINE",59.0,53.0,10.2%,
+sorbet,0.97,0.001,0.243,0.002,0.005,usda,,,,,,no USDA result found
+souffle,2.13,0.112,0.18,0.075,0.003,usda,170494,Spinach souffle,213.0,172,19.2%,
+soy nuts,4.71,0.222,0.335,0.351,0.089,usda,173779,SILK Peach soy yogurt,471.0,393,16.6%,
+soy yogurt,0.72,0.02,0.112,0.035,0.005,usda,175227,SILK Plain soy yogurt,72.0,276,283.3%,
+spinach (cooked),0.23,0.003,0.036,0.029,0.024,usda,,,,,,no USDA result found
+spinach (raw),0.23,0.004,0.036,0.029,0.022,usda,,,,,,no USDA result found
+spring rolls,2.02,0.058,0.293,0.068,0.02,usda,175030,"Rolls, dinner, wheat",202.0,273,35.1%,
+steak,2.71,0.179,0.0,0.261,0.0,usda,170733,"TACO BELL, Soft Taco with steak",271.0,225,17.0%,
+stews,0.83,0.028,0.076,0.068,0.01,usda,168061,Acorn stew (Apache),83.0,95.0,14.5%,
+strawberries,0.32,0.003,0.077,0.007,0.02,usda,2346409,"Strawberries, raw",32.0,36.4,13.7%,
+sushi,1.43,0.028,0.255,0.058,0.008,usda,,,,,,no USDA result found
+swiss cheese,3.8,0.278,0.054,0.27,0.0,usda,170855,"Cheese, pasteurized process, swiss",380.0,334,12.1%,
+tabouli,1.28,0.048,0.184,0.032,0.028,usda,,,,,,no USDA result found
+taco salad,1.52,0.079,0.119,0.075,0.02,usda,170732,"TACO BELL, Soft Taco with chicken, cheese and lettuce",152.0,189,24.3%,
+taquitos,2.34,0.107,0.26,0.085,0.018,usda,169772,"Taquitos, frozen, beef and cheese, oven-heated",234.0,287,22.6%,
+tatsoi,0.22,0.003,0.034,0.015,0.012,usda,,,,,,no USDA result found
+tempura,2.17,0.107,0.239,0.067,0.013,usda,,,,,,no USDA result found
+teriyaki sauce,0.89,0.001,0.159,0.058,0.001,usda,171610,"Sauce, worcestershire",89.0,77.0,13.5%,
+tofu,0.76,0.048,0.019,0.08,0.003,usda,173788,HOUSE FOODS Premium Firm Tofu,76.0,85.0,11.8%,
+tomatillo,0.32,0.01,0.059,0.01,0.019,usda,168566,"Tomatillos, raw",32.0,133,315.6%,
+tomato soup,0.3,0.008,0.048,0.007,0.005,usda,174569,"Soup, tomato, dry, mix, prepared with water",30.0,38.0,26.7%,
+tomatoes,0.18,0.002,0.039,0.009,0.012,usda,170502,"Tomatoes, orange, raw",18.0,16.0,11.1%,
+tostadas,4.8,0.222,0.585,0.069,0.051,usda,,,,,,no usable USDA nutrients
+turnover,3.0,0.14,0.4,0.04,0.012,usda,168963,"Turnover, filled with egg, meat and cheese, frozen",300.0,228,24.0%,
+vinaigrette,2.14,0.2,0.08,0.003,0.002,usda,,,,,,no USDA result found
+water chestnuts,0.97,0.001,0.237,0.014,0.03,usda,170168,"Nuts, chestnuts, european, boiled and steamed",97.0,131,35.1%,
+watermelon,0.3,0.002,0.076,0.006,0.004,usda,2747676,"Watermelon, seedless, rind only, raw",30.0,23.9,20.3%,
+wraps,2.91,0.074,0.494,0.076,0.025,usda,170778,"McDONALD'S, RANCH SNACK WRAP, Grilled",291.0,222,23.7%,
+yogurt,0.63,0.033,0.047,0.035,0.0,usda,2647437,"Yogurt, plain, nonfat",63.0,50.0,20.6%,
