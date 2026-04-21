@@ -36,7 +36,7 @@ if not GEMINI_API_KEY:
     print("   Then: export GEMINI_API_KEY=your_key_here")
 
 # Configure Gemini
-MODEL_NAME = "gemini-2.0-flash"
+MODEL_NAME = "gemini-2.5-flash"
 if GEMINI_API_KEY:
     client = genai.Client(
         api_key=GEMINI_API_KEY,
